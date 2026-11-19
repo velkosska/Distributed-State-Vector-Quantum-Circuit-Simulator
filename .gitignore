@@ -1,0 +1,25 @@
+# build trees
+build/
+build-*/
+cmake-build-*/
+
+# python
+__pycache__/
+*.pyc
+env/.venv/
+
+# generated circuits and raw state dumps (regenerate with src/tools/gen_circuits.py)
+data/*
+!data/README.md
+!data/examples/
+*.bin
+
+# raw job output; commit only curated CSVs/plots under results/
+results/**/raw/
+slurm-*.out
+slurm-*.err
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
