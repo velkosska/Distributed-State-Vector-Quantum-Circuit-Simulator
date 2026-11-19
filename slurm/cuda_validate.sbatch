@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=qsim-cuda-validate
 #SBATCH --partition=gpu
-#SBATCH --nodelist=haskell       # RTX 6000 Ada (sm_89); keep all CUDA runs on the same card
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
@@ -12,6 +11,11 @@
 #
 #   sbatch slurm/cuda_validate.sbatch
 #   MAX_QUBITS=12 sbatch slurm/cuda_validate.sbatch
+#   sbatch --nodelist=haskell slurm/cuda_validate.sbatch   # pin a node (haskell = RTX 6000 Ada)
+#
+# Runs on any free GPU node; the CUDA arch is detected from the GPU it gets
+# (override with CUDA_ARCH=89 etc.). For benchmarks, pin one node so all
+# numbers come from the same card.
 #
 # One-time setup on the login node first: bash env/setup_venv.sh (numpy + qiskit).
 # CUDA on this cluster is an Apptainer container: every CUDA command runs via cuda-exec.
@@ -19,7 +23,6 @@
 set -euo pipefail
 
 MAX_QUBITS=${MAX_QUBITS:-20}
-CUDA_ARCH=${CUDA_ARCH:-89}
 BUILD=build-cuda
 
 ROOT="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
@@ -30,6 +33,12 @@ module load hpc-course-cuda/12.8.1
 echo "--- node $(hostname), commit $(git rev-parse --short HEAD)"
 module list 2>&1
 cuda-exec nvidia-smi
+
+# Compute capability of the GPU we got, e.g. "8.9" -> 89 (RTX 6000 Ada).
+if [ -z "${CUDA_ARCH:-}" ]; then
+  CUDA_ARCH=$(cuda-exec nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1 | tr -d ' .')
+fi
+echo "--- CUDA_ARCH=$CUDA_ARCH"
 
 # ---------------------------------------------------------------- build
 if cuda-exec bash -c 'command -v cmake' >/dev/null 2>&1; then
