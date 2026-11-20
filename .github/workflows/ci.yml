@@ -46,6 +46,17 @@ jobs:
           ./build/qsim rg.txt --quiet
           python3 src/tools/analyze_circuit.py rg.txt --ranks 1,2,4
 
+      - name: Run harness smoke test (local mode, tiny sizes)
+        env:
+          HARNESS_SKIP_MODULES: 1
+        run: |
+          QUBITS="8 10" REPEATS=2 bash slurm/baseline.sbatch
+          ./build/stream_triad 16 2
+          test "$(tail -n +2 results/baseline/*/runs.csv | grep -c ',ok,')" -eq 12
+
+      - name: Analysis tests
+        run: python3 -m pytest analysis -q
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -39,6 +39,14 @@ endif()
 add_executable(qsim src/apps/qsim_main.cpp)
 target_link_libraries(qsim PRIVATE qsim_core)
 
+# Memory-bandwidth probe for the roofline (slurm/stream.sbatch). Always built
+# with OpenMP if the compiler supports it, independent of QSIM_OPENMP.
+add_executable(stream_triad src/bench/stream_triad.cpp)
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(stream_triad PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
 if(QSIM_CUDA)
   # Default arch 89 = RTX 6000 Ada (haskell). Override with -DCMAKE_CUDA_ARCHITECTURES=...
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
