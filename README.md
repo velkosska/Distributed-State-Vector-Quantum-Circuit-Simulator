@@ -104,7 +104,8 @@ in the same `runs.csv` format ([`results/README.md`](results/README.md)).
 Read [`docs/kernel_api.md`](docs/kernel_api.md): it describes the pair-index
 kernel loop, where the OpenMP pragma goes, how MPI ranks map to global qubits
 and which kernel to call after an exchange, and how the CUDA port mirrors the
-same kernels.
+same kernels. The MPI backend itself (build, options, remapping) is described in
+[`docs/mpi_backend.md`](docs/mpi_backend.md).
 
 ## Team
 

@@ -22,7 +22,7 @@
 #   sbatch slurm/sensitivity.sbatch                           # N=30, P=16
 #   N=32 FRACTIONS="0 0.1 0.5 1" sbatch --nodes=4 slurm/sensitivity.sbatch
 #
-# Turn MPI qubit remapping OFF for this experiment (pass the flag via QSIM_ARGS),
+# Turn MPI qubit remapping OFF for this experiment (QSIM_ARGS=--no-remap),
 # otherwise the binary moves gates off global qubits and pct_comm from the static
 # analysis no longer matches what ran. Run it again with remapping ON to show the gain.
 set -euo pipefail
