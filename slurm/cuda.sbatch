@@ -2,17 +2,22 @@
 #SBATCH --job-name=qsim-cuda
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:rtx6000bb:1   # RTX PRO 6000 Blackwell, 96 GB (julia/fortran): same card for every run
-#SBATCH --exclusive              # whole node: the CPU side uses all cores, no neighbours on the memory bus
-#SBATCH --mem=0                  # all node memory (32 qubits = 64 GiB state on the host too)
+#SBATCH --cpus-per-task=8        # CPU side uses these cores. The course QOS caps cores per user, so no
+                                 # --exclusive; raise to your limit: sbatch --cpus-per-task=N slurm/cuda.sbatch
+#SBATCH --mem=80G                # 32 qubits = 64 GiB state, also held on the host
 #SBATCH --time=04:00:00
 #SBATCH --output=slurm-%x-%j.out
 #
-# 1 GPU vs 1 full CPU node, on the same node: QFT, Grover and random circuits,
-# REPEATS runs each, fixed seeds.
+# 1 GPU vs the CPU cores we are allowed on the same node: QFT, Grover and
+# random circuits, REPEATS runs each, fixed seeds.
 #   GPU: qsim_cuda (built here for this card)
-#   CPU: qsim built with OpenMP, one thread per physical core, pinned
+#   CPU: qsim built with OpenMP, one thread per allocated core, pinned
+# A full node is not possible: QOSMaxCpuPerUserLimit. Find your limit with
+#   sacctmgr show assoc user=$USER format=User,QOS%20,MaxTRES%30
+#   sacctmgr show qos format=Name%20,MaxTRESPerUser%30
 #
 #   sbatch slurm/cuda.sbatch
+#   sbatch --cpus-per-task=16 slurm/cuda.sbatch                               # more CPU cores
 #   GPU_QUBITS="20 24" CPU_QUBITS="20 24" REPEATS=1 sbatch slurm/cuda.sbatch   # quick test
 #   RUN_CPU=0 sbatch slurm/cuda.sbatch                                        # GPU only
 #
@@ -48,11 +53,12 @@ mkdir -p "$OUT/raw" data/cuda
 # ---------------------------------------------------------------- build
 source slurm/lib/build_cuda.sh             # GPU: sets CUDA_ARCH, CUDA_BUILD, QSIM_CUDA_BIN
 
-PHYS_CORES=$(lscpu -p=CORE,SOCKET | grep -v '^#' | sort -u | wc -l)
+PHYS_CORES=$(lscpu -p=CORE,SOCKET | grep -v '^#' | sort -u | wc -l)   # whole node, for the record
+CPU_THREADS=${SLURM_CPUS_PER_TASK:-$PHYS_CORES}                      # what this job may use
 if [ "$RUN_CPU" = 1 ]; then
   echo "--- building OpenMP qsim on $(hostname)"
   cmake -S . -B build-omp -DQSIM_OPENMP=ON -DQSIM_NATIVE=ON -DQSIM_TESTS=OFF >/dev/null
-  cmake --build build-omp -j "$PHYS_CORES" --target qsim >/dev/null
+  cmake --build build-omp -j "$CPU_THREADS" --target qsim >/dev/null
 fi
 
 # ---------------------------------------------------------------- metadata
@@ -61,7 +67,8 @@ fi
   echo "date:          $(date -Iseconds)"
   echo "host:          $(hostname)"
   echo "cpu:           $(lscpu | sed -n 's/^Model name:[[:space:]]*//p')"
-  echo "physical_cores: $PHYS_CORES"
+  echo "physical_cores: $PHYS_CORES (node)"
+  echo "cpu_threads:   $CPU_THREADS (allocated to this job)"
   echo "git_commit:    $(git rev-parse --verify -q HEAD || echo unknown)"
   echo "git_dirty:     $(git status --porcelain 2>/dev/null | grep -q . && echo yes || echo no)"
   echo "cuda_arch:     sm_$CUDA_ARCH"
@@ -123,9 +130,9 @@ for kind in $KINDS; do
   done
 done
 
-# ---------------------------------------------------------------- CPU (whole node)
+# ---------------------------------------------------------------- CPU (allocated cores)
 if [ "$RUN_CPU" = 1 ]; then
-  export OMP_NUM_THREADS=$PHYS_CORES OMP_PROC_BIND=spread OMP_PLACES=cores
+  export OMP_NUM_THREADS=$CPU_THREADS OMP_PROC_BIND=spread OMP_PLACES=cores
   echo "OMP_NUM_THREADS=$OMP_NUM_THREADS OMP_PROC_BIND=$OMP_PROC_BIND OMP_PLACES=$OMP_PLACES" >> "$OUT/meta.txt"
   for kind in $KINDS; do
     for n in $CPU_QUBITS; do
