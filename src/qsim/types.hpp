@@ -4,6 +4,13 @@
 #include <complex>
 #include <cstdint>
 
+// Index helpers below are also called from CUDA kernels (src/qsim/cuda/).
+#if defined(__CUDACC__)
+#define QSIM_HD __host__ __device__
+#else
+#define QSIM_HD
+#endif
+
 namespace qsim {
 
 using real  = double;
@@ -16,18 +23,18 @@ using index = std::uint64_t;   // amplitude index; supports up to 63 qubits
 //   a1' = m10*a0 + m11*a1
 using Mat2 = std::array<cplx, 4>;
 
-inline constexpr index pow2(int k) { return index{1} << k; }
+QSIM_HD inline constexpr index pow2(int k) { return index{1} << k; }
 
 // Insert a 0 bit at position q of i (bits >= q are shifted up by one).
 // Enumerating k = 0 .. 2^(n-1)-1 and taking i0 = insert_zero_bit(k, q)
 // visits every amplitude pair (i0, i0 | 2^q) exactly once.
-inline constexpr index insert_zero_bit(index i, int q) {
+QSIM_HD inline constexpr index insert_zero_bit(index i, int q) {
   const index low = i & (pow2(q) - 1);
   return ((i >> q) << (q + 1)) | low;
 }
 
 // Insert two 0 bits at positions lo < hi (positions refer to the final index).
-inline constexpr index insert_two_zero_bits(index i, int lo, int hi) {
+QSIM_HD inline constexpr index insert_two_zero_bits(index i, int lo, int hi) {
   return insert_zero_bit(insert_zero_bit(i, lo), hi);
 }
 
