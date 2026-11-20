@@ -1,2 +1,10 @@
-numpy>=1.24
-qiskit>=1.0
+# Direct dependencies, pinned. Tested with Python 3.11 (the cluster module
+# Python/3.11.3) and 3.13. The full transitive set is in requirements.lock;
+# env/setup_venv.sh installs from the lock file for exact reproducibility.
+#
+# To upgrade: change a pin here, then regenerate the lock (see REPRODUCE.md, "Updating pins").
+numpy==2.4.6          # generators, validation, analysis
+qiskit==2.6.2         # reference state vectors (src/tools/validate_qiskit.py)
+pandas==3.1.1         # analysis/
+matplotlib==3.11.2    # analysis/ figures
+pytest==9.2.0         # analysis/test_qsimres.py

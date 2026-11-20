@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -45,6 +46,8 @@ def qiskit_state(c: Circuit) -> np.ndarray:
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--qsim", default="build/qsim", help="path to the qsim binary")
+    p.add_argument("--launcher", default="",
+                   help='command prefix for distributed binaries, e.g. "mpirun -np 4"')
     p.add_argument("--min-qubits", type=int, default=2)
     p.add_argument("--max-qubits", type=int, default=20)
     p.add_argument("--step", type=int, default=1)
@@ -71,7 +74,7 @@ def main(argv=None):
         circ.write(str(cfile))
 
         t0 = time.perf_counter()
-        subprocess.run([str(qsim), str(cfile), "--dump", str(dfile), "--quiet", "--no-gate-timing"],
+        subprocess.run([*shlex.split(args.launcher), str(qsim), str(cfile), "--dump", str(dfile), "--quiet", "--no-gate-timing"],
                        check=True, stdout=subprocess.DEVNULL)
         t_qsim = time.perf_counter() - t0
         ours = np.fromfile(dfile, dtype=np.complex128)

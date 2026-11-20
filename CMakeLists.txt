@@ -13,6 +13,7 @@ option(QSIM_NATIVE  "Compile with -march=native" ON)
 option(QSIM_OPENMP  "Enable OpenMP (gate loops, state initialisation)" OFF)
 option(QSIM_TESTS   "Build unit tests" ON)
 option(QSIM_CUDA    "Build the single-GPU backend (qsim_cuda)" OFF)
+option(QSIM_MPI     "Build the distributed backend (qsim_mpi)" OFF)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 # C++ only: nvcc does not accept these flags for .cu files.
@@ -39,6 +40,14 @@ endif()
 add_executable(qsim src/apps/qsim_main.cpp)
 target_link_libraries(qsim PRIVATE qsim_core)
 
+# Memory-bandwidth probe for the roofline (slurm/stream.sbatch). Always built
+# with OpenMP if the compiler supports it, independent of QSIM_OPENMP.
+add_executable(stream_triad src/bench/stream_triad.cpp)
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(stream_triad PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
 if(QSIM_CUDA)
   # Default arch 89 = RTX 6000 Ada (haskell). Override with -DCMAKE_CUDA_ARCHITECTURES=...
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
@@ -55,6 +64,23 @@ if(QSIM_CUDA)
   target_link_libraries(qsim_cuda PRIVATE qsim_cuda_backend)
 endif()
 
+if(QSIM_MPI)
+  find_package(MPI REQUIRED COMPONENTS CXX)
+  add_library(qsim_mpi_backend src/qsim/mpi/dist_sim.cpp)
+  target_link_libraries(qsim_mpi_backend PUBLIC qsim_core MPI::MPI_CXX)
+  add_executable(qsim_mpi src/apps/qsim_mpi_main.cpp)
+  target_link_libraries(qsim_mpi PRIVATE qsim_mpi_backend)
+  if(QSIM_TESTS)
+    enable_testing()
+    add_executable(test_mpi tests/test_mpi.cpp)
+    target_link_libraries(test_mpi PRIVATE qsim_mpi_backend)
+    foreach(np 1 2 4 8)
+      add_test(NAME mpi_np${np} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+               ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi> ${MPIEXEC_POSTFLAGS})
+    endforeach()
+  endif()
+endif()
+
 if(QSIM_TESTS)
   enable_testing()
   add_executable(test_kernels tests/test_kernels.cpp)
@@ -62,4 +88,4 @@ if(QSIM_TESTS)
   add_test(NAME kernels COMMAND test_kernels)
 endif()
 
-message(STATUS "qsim: build=${CMAKE_BUILD_TYPE} native=${QSIM_NATIVE} openmp=${QSIM_OPENMP} cuda=${QSIM_CUDA}")
+message(STATUS "qsim: build=${CMAKE_BUILD_TYPE} native=${QSIM_NATIVE} openmp=${QSIM_OPENMP} mpi=${QSIM_MPI} cuda=${QSIM_CUDA}")

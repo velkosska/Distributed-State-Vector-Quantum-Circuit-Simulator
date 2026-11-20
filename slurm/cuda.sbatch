@@ -2,35 +2,34 @@
 #SBATCH --job-name=qsim-cuda
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:rtx6000bb:1   # RTX PRO 6000 Blackwell, 96 GB (julia/fortran): same card for every run
-#SBATCH --cpus-per-task=8        # CPU side uses these cores. The course QOS caps cores per user, so no
-                                 # --exclusive; raise to your limit: sbatch --cpus-per-task=N slurm/cuda.sbatch
+#SBATCH --cpus-per-task=64       # CPU side. Course QOS "student" caps a user at 64 CPUs, so no --exclusive
 #SBATCH --mem=80G                # 32 qubits = 64 GiB state, also held on the host
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
 #SBATCH --output=slurm-%x-%j.out
 #SBATCH --requeue                # student jobs can be preempted; Slurm requeues the job ...
-#SBATCH --open-mode=append       # ... and it resumes: finished runs are skipped, the log is kept
+#SBATCH --open-mode=append       # ... and it resumes (finished runs are skipped), keeping the log
 #
-# 1 GPU vs the CPU cores we are allowed on the same node: QFT, Grover and
-# random circuits, REPEATS runs each, fixed seeds.
-#   GPU: qsim_cuda (built here for this card)
-#   CPU: qsim built with OpenMP, one thread per allocated core, pinned
-# A full node is not possible: QOSMaxCpuPerUserLimit. Find your limit with
-#   sacctmgr show assoc user=$USER format=User,QOS%20,MaxTRES%30
-#   sacctmgr show qos format=Name%20,MaxTRESPerUser%30
+# CUDA experiment: 1 GPU vs the CPU cores of the same node, through the shared
+# run harness (slurm/lib/run_harness.sh). QFT, Grover and random circuits,
+# fixed seeds, REPEATS runs each.
+#   GPU (backend=cuda):   build-cuda/qsim_cuda, built here for this card, 20-32 qubits
+#   CPU (backend=openmp): build-omp/qsim, one thread per allocated CPU, pinned, 20-30 qubits
+# A full CPU node is not possible on this cluster (QOSMaxCpuPerUserLimit, cpu=64).
 #
 #   sbatch slurm/cuda.sbatch
-#   sbatch --cpus-per-task=16 slurm/cuda.sbatch                               # more CPU cores
-#   GPU_QUBITS="20 24" CPU_QUBITS="20 24" REPEATS=1 sbatch slurm/cuda.sbatch   # quick test
-#   RUN_CPU=0 sbatch slurm/cuda.sbatch                                        # GPU only
-#   RESUME_DIR=results/cuda/12345 sbatch slurm/cuda.sbatch                    # finish an old job's runs
+#   GPU_QUBITS="20 24" CPU_QUBITS="20 24" REPEATS=1 sbatch --time=00:30:00 slurm/cuda.sbatch   # quick test
+#   RUN_CPU=0 sbatch slurm/cuda.sbatch                                                         # GPU only
 #
-# Resumable: a run whose (device, kind, qubits, repeat) row is already in
-# runs.csv is skipped, so a preempted + requeued job continues where it stopped.
+# Output: results/cuda/<jobid>/ (harness layout: meta.txt, runs.csv, raw/) plus
+#   speedup.csv          median CPU total_s / median GPU total_s per circuit and size
+#   raw/gpu_*.gates.csv  one per-gate timing run per circuit and size (GB/s per gate),
+#                        kept out of runs.csv because per-gate syncs inflate total_s
+#   raw/*.out            full stdout of every run, incl. the GPU copy times h2d_s / d2h_s
+# total_s is gate time only on both backends (the GPU copies are not included).
 #
-# Output: results/cuda/<jobid>/{meta.txt, runs.csv, speedup.csv, raw/}
-#   runs.csv:    one row per run (total_s = gate time only, h2d_s/d2h_s = GPU copies)
-#   speedup.csv: median CPU time / median GPU time per circuit and size
-#   raw/:        stdout and per-gate timing CSVs of the GPU (GB/s per gate)
+# Preemption: Slurm requeues the job under the same id. The previous attempt is
+# moved to results/cuda/<jobid>_partN/ and its finished runs are not repeated;
+# the analysis reads every runs.csv, so all parts together form the result.
 
 set -euo pipefail
 
@@ -40,152 +39,124 @@ KINDS=${KINDS:-"qft grover random"}
 REPEATS=${REPEATS:-3}
 SEED=${SEED:-1}
 RANDOM_DEPTH=${RANDOM_DEPTH:-10}
-GROVER_ITERS=${GROVER_ITERS:-1}   # same as slurm/baseline.sbatch: 1 iteration is enough for time per gate
+GROVER_ITERS=${GROVER_ITERS:-1}   # as in baseline.sbatch: 1 iteration is enough for time per gate
 RUN_CPU=${RUN_CPU:-1}
 
 ROOT="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$ROOT"
-source env/modules.sh
-module load hpc-course-cuda/12.8.1
+set +u; source env/modules.sh cuda; set -u   # GCC, CMake, Python + venv, course CUDA container
 
 # Load every kernel when the GPU context starts, so the first gate of a run is
 # not charged for lazy kernel loading (seen as a ~1 ms first gate in validation).
 export CUDA_MODULE_LOADING=EAGER
 
-JOBID=${SLURM_JOB_ID:-local-$(date +%Y%m%d-%H%M%S)}
-OUT=${RESUME_DIR:-results/cuda/$JOBID}
-mkdir -p "$OUT/raw" data/cuda
-
 # ---------------------------------------------------------------- build
-source slurm/lib/build_cuda.sh             # GPU: sets CUDA_ARCH, CUDA_BUILD, QSIM_CUDA_BIN
-
-PHYS_CORES=$(lscpu -p=CORE,SOCKET | grep -v '^#' | sort -u | wc -l)   # whole node, for the record
-CPU_THREADS=${SLURM_CPUS_PER_TASK:-$PHYS_CORES}                      # what this job may use
+source slurm/lib/build_cuda.sh             # -> build-cuda/qsim_cuda, sets CUDA_ARCH, QSIM_CUDA_BIN
+CPU_THREADS=${SLURM_CPUS_PER_TASK:-$(nproc)}
 if [ "$RUN_CPU" = 1 ]; then
-  echo "--- building OpenMP qsim on $(hostname)"
+  echo "--- building OpenMP qsim (build-omp) on $(hostname)"
   cmake -S . -B build-omp -DQSIM_OPENMP=ON -DQSIM_NATIVE=ON -DQSIM_TESTS=OFF >/dev/null
   cmake --build build-omp -j "$CPU_THREADS" --target qsim >/dev/null
 fi
 
-# ---------------------------------------------------------------- metadata
-if [ -f "$OUT/meta.txt" ]; then
-  # Requeued or resumed: keep what is there, note the restart (may be another node).
-  {
-    echo "--- restart $(date -Iseconds) job $JOBID (restart count ${SLURM_RESTART_COUNT:-0}) on $(hostname)"
-    echo "git_commit:    $(git rev-parse --verify -q HEAD || echo unknown)"
-    cuda-exec nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
-  } >> "$OUT/meta.txt"
-else
-{
-  echo "job_id:        $JOBID"
-  echo "date:          $(date -Iseconds)"
-  echo "host:          $(hostname)"
-  echo "cpu:           $(lscpu | sed -n 's/^Model name:[[:space:]]*//p')"
-  echo "physical_cores: $PHYS_CORES (node)"
-  echo "cpu_threads:   $CPU_THREADS (allocated to this job)"
-  echo "git_commit:    $(git rev-parse --verify -q HEAD || echo unknown)"
-  echo "git_dirty:     $(git status --porcelain 2>/dev/null | grep -q . && echo yes || echo no)"
-  echo "cuda_arch:     sm_$CUDA_ARCH"
-  echo "gpu_binary:    $QSIM_CUDA_BIN"
-  echo "cpu_binary:    build-omp/qsim (OpenMP, -march=native)"
-  echo "gpu_qubits:    $GPU_QUBITS"
-  echo "cpu_qubits:    $CPU_QUBITS"
-  echo "kinds:         $KINDS"
-  echo "repeats:       $REPEATS"
-  echo "seed:          $SEED"
-  echo "random_depth:  $RANDOM_DEPTH"
-  echo "grover_iters:  $GROVER_ITERS"
-  echo "CUDA_MODULE_LOADING=$CUDA_MODULE_LOADING"
-  echo "--- module list"
-  module list 2>&1
-  echo "--- nvidia-smi"
-  cuda-exec nvidia-smi
-  echo "--- commands"
-} > "$OUT/meta.txt"
+# ---------------------------------------------------------------- resume after preemption
+JOBDIR="results/cuda/${SLURM_JOB_ID:-none}"
+if [ -n "${SLURM_JOB_ID:-}" ] && [ -d "$JOBDIR" ]; then
+  part=1; while [ -d "${JOBDIR}_part$part" ]; do part=$((part + 1)); done
+  mv "$JOBDIR" "${JOBDIR}_part$part"
+  echo "--- requeued: previous attempt moved to ${JOBDIR}_part$part"
 fi
+shopt -s nullglob; PREV=("${JOBDIR}"_part*/runs.csv); shopt -u nullglob
 
-[ -f "$OUT/runs.csv" ] ||
-  echo "device,kind,qubits,repeat,seed,gates,total_s,mean_gate_s,h2d_s,d2h_s,norm_err,threads,host,circuit" > "$OUT/runs.csv"
-
-# done DEVICE KIND N REPEAT -> true if that run is already in runs.csv
-done_already() { grep -q "^$1,$2,$3,$4," "$OUT/runs.csv"; }
-
-# make_circuit KIND N -> prints the circuit path (generated once, reused by GPU and CPU)
-make_circuit() {
-  local kind=$1 n=$2 circ="data/cuda/${1}_${2}_s${SEED}.txt"
-  if [ ! -f "$circ" ]; then
-    case $kind in
-      qft)    python3 src/tools/gen_circuits.py qft -n "$n" --seed "$SEED" -o "$circ" ;;
-      grover) python3 src/tools/gen_circuits.py grover -n "$n" --seed "$SEED" --iterations "$GROVER_ITERS" -o "$circ" ;;
-      random) python3 src/tools/gen_circuits.py random -n "$n" --seed "$SEED" --depth "$RANDOM_DEPTH" -o "$circ" ;;
-      *) echo "unknown kind $kind" >&2; exit 1 ;;
-    esac >/dev/null
-  fi
-  echo "$circ"
+# done_already BACKEND KIND QUBITS REPEAT -> true if an earlier attempt finished that run
+# (runs.csv columns: 4 backend, 5 kind, 6 qubits, 11 repeat, 23 status)
+done_already() {
+  [ ${#PREV[@]} -gt 0 ] || return 1
+  awk -F, -v b="$1" -v k="$2" -v q="$3" -v r="$4" \
+    'FNR > 1 && $4 == b && $5 == k && $6 == q && $11 == r && $23 == "ok" { f = 1 } END { exit !f }' "${PREV[@]}"
 }
 
-# run_one DEVICE THREADS KIND N REPEAT CMD... -> runs CMD, appends one row to runs.csv
-run_one() {
-  local device=$1 threads=$2 kind=$3 n=$4 r=$5; shift 5
-  if done_already "$device" "$kind" "$n" "$r"; then
-    echo "[$(date +%T)] $device $kind n=$n rep=$r already done, skipping"
-    return
-  fi
-  echo "$*" >> "$OUT/meta.txt"
-  local line
-  line=$("$@" | tee -a "$OUT/raw/stdout_${device}.txt" | grep '^SUMMARY')
-  get() { sed -n "s/.* $1=\([^ ]*\).*/\1/p" <<<"$line"; }
-  echo "$device,$kind,$n,$r,$SEED,$(get gates_run),$(get total_s),$(get mean_gate_s),$(get h2d_s),$(get d2h_s),$(get norm_err),$threads,$(hostname),${@: -1}" \
-    >> "$OUT/runs.csv"
-  echo "[$(date +%T)] $device $kind n=$n rep=$r total_s=$(get total_s)"
+# ---------------------------------------------------------------- harness
+export QSIM_BIN=$QSIM_CUDA_BIN BACKEND=cuda GATE_TIMING=0
+export HARNESS_SKIP_MODULES=1 HARNESS_SCRIPT=slurm/cuda.sbatch   # modules are already loaded above
+source slurm/lib/run_harness.sh
+max_q=$(tr ' ' '\n' <<<"$GPU_QUBITS $CPU_QUBITS" | sort -n | tail -1)
+harness_guard_local "$max_q"
+harness_init cuda
+OUT=$HARNESS_OUT
+{
+  echo
+  echo "--- cuda experiment"
+  echo "cuda_arch:       sm_$CUDA_ARCH"
+  echo "gpu_binary:      $QSIM_CUDA_BIN (backend=cuda)"
+  echo "cpu_binary:      build-omp/qsim (backend=openmp, $CPU_THREADS threads)"
+  echo "gpu_qubits:      $GPU_QUBITS"
+  echo "cpu_qubits:      ${CPU_QUBITS} (run_cpu=$RUN_CPU)"
+  echo "resumed_from:    ${PREV[*]:-none}"
+} >> "$OUT/meta.txt"
+cuda-exec nvidia-smi > "$OUT/raw/nvidia-smi.txt" 2>&1 || true
+
+# circuit KIND N -> sets $circ and $extra (harness keys for the circuit parameters)
+circuit() {
+  case $1 in
+    qft)    circ=$(harness_gen_circuit qft "$2" --seed "$SEED"); extra=() ;;
+    grover) circ=$(harness_gen_circuit grover "$2" --seed "$SEED" --iterations "$GROVER_ITERS"); extra=(iterations="$GROVER_ITERS") ;;
+    random) circ=$(harness_gen_circuit random "$2" --seed "$SEED" --depth "$RANDOM_DEPTH"); extra=(depth="$RANDOM_DEPTH") ;;
+    *) echo "unknown kind $1" >&2; exit 1 ;;
+  esac
 }
 
 # ---------------------------------------------------------------- GPU
+export OMP_NUM_THREADS=1
 for kind in $KINDS; do
   for n in $GPU_QUBITS; do
-    circ=$(make_circuit "$kind" "$n")
-    # One run with per-gate timing (GB/s per gate); not counted in runs.csv.
-    gates_csv="$OUT/raw/gpu_${kind}_${n}_gates.csv"
-    if [ ! -s "$gates_csv" ]; then
-      "$QSIM_CUDA_BIN" "$circ" --quiet --timing "$gates_csv.tmp" >/dev/null && mv "$gates_csv.tmp" "$gates_csv"
+    circuit "$kind" "$n"
+    gates_csv="$OUT/raw/gpu_${kind}_${n}q.gates.csv"
+    if ! ls "${JOBDIR}"_part*/raw/"gpu_${kind}_${n}q.gates.csv" >/dev/null 2>&1; then
+      echo "gates  $QSIM_CUDA_BIN $circ --quiet --timing $gates_csv" >> "$OUT/meta.txt"
+      "$QSIM_CUDA_BIN" "$circ" --quiet --timing "$gates_csv" > /dev/null || echo "per-gate run failed: $kind $n" >&2
     fi
-    # Timed repeats without per-gate syncs, so total_s is pure back-to-back kernel time.
     for r in $(seq 1 "$REPEATS"); do
-      run_one gpu 0 "$kind" "$n" "$r" "$QSIM_CUDA_BIN" --quiet --no-gate-timing "$circ"
+      done_already cuda "$kind" "$n" "$r" && { echo "skip (done earlier): cuda $kind n=$n rep=$r"; continue; }
+      harness_run kind="$kind" qubits="$n" repeat="$r" seed="$SEED" gpus=1 threads=1 circuit="$circ" ${extra[@]+"${extra[@]}"}
     done
   done
 done
 
-# ---------------------------------------------------------------- CPU (allocated cores)
+# ---------------------------------------------------------------- CPU (allocated cores of the same node)
 if [ "$RUN_CPU" = 1 ]; then
+  export QSIM_BIN=build-omp/qsim BACKEND=openmp
   export OMP_NUM_THREADS=$CPU_THREADS OMP_PROC_BIND=spread OMP_PLACES=cores
-  echo "OMP_NUM_THREADS=$OMP_NUM_THREADS OMP_PROC_BIND=$OMP_PROC_BIND OMP_PLACES=$OMP_PLACES" >> "$OUT/meta.txt"
+  echo "cpu runs: OMP_NUM_THREADS=$OMP_NUM_THREADS OMP_PROC_BIND=$OMP_PROC_BIND OMP_PLACES=$OMP_PLACES" >> "$OUT/meta.txt"
   for kind in $KINDS; do
     for n in $CPU_QUBITS; do
-      circ=$(make_circuit "$kind" "$n")
+      circuit "$kind" "$n"
       for r in $(seq 1 "$REPEATS"); do
-        run_one cpu "$OMP_NUM_THREADS" "$kind" "$n" "$r" build-omp/qsim --quiet --no-gate-timing "$circ"
+        done_already openmp "$kind" "$n" "$r" && { echo "skip (done earlier): openmp $kind n=$n rep=$r"; continue; }
+        harness_run kind="$kind" qubits="$n" repeat="$r" seed="$SEED" gpus=0 threads="$CPU_THREADS" circuit="$circ" ${extra[@]+"${extra[@]}"}
       done
     done
   done
 fi
 
-# ---------------------------------------------------------------- speedup table
-python3 - "$OUT" <<'EOF'
+# ---------------------------------------------------------------- speedup table (this job, all parts)
+python3 - "$OUT" ${PREV[@]+"${PREV[@]}"} <<'EOF'
 import csv, statistics, sys
 from collections import defaultdict
-out = sys.argv[1]
+out, prev = sys.argv[1], sys.argv[2:]
 t = defaultdict(list)
-for row in csv.DictReader(open(f"{out}/runs.csv")):
-    t[(row["kind"], int(row["qubits"]), row["device"])].append(float(row["total_s"]))
+for path in [f"{out}/runs.csv", *prev]:
+    for row in csv.DictReader(open(path)):
+        if row["status"] == "ok" and row["total_s"]:
+            t[(row["kind"], int(row["qubits"]), row["backend"])].append(float(row["total_s"]))
 keys = sorted({(k, n) for k, n, _ in t})
 with open(f"{out}/speedup.csv", "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["kind", "qubits", "gpu_median_s", "cpu_median_s", "speedup"])
     print(f"{'kind':8}{'qubits':>7}{'gpu_s':>12}{'cpu_s':>12}{'speedup':>9}")
     for k, n in keys:
-        g = statistics.median(t[(k, n, "gpu")]) if t[(k, n, "gpu")] else None
-        c = statistics.median(t[(k, n, "cpu")]) if t[(k, n, "cpu")] else None
+        g = statistics.median(t[(k, n, "cuda")]) if t[(k, n, "cuda")] else None
+        c = statistics.median(t[(k, n, "openmp")]) if t[(k, n, "openmp")] else None
         s = c / g if g and c else None
         w.writerow([k, n, g or "", c or "", f"{s:.2f}" if s else ""])
         gs = f"{g:12.4g}" if g is not None else "-".rjust(12)
@@ -194,4 +165,4 @@ with open(f"{out}/speedup.csv", "w", newline="") as f:
         print(f"{k:8}{n:7d}{gs}{cs}{ss}")
 EOF
 
-echo "done: $OUT"
+harness_finish

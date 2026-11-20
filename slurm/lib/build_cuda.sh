@@ -3,7 +3,7 @@
 #
 # Sets:
 #   CUDA_ARCH      compute capability of the GPU, e.g. 89 (RTX 6000 Ada), 120 (RTX PRO 6000 Blackwell)
-#   CUDA_BUILD     build directory (one per arch, so jobs on different cards don't clash)
+#   CUDA_BUILD     build directory (default build-cuda, the path the docs and job scripts expect)
 #   QSIM_CUDA_BIN  command that runs qsim_cuda: the binary itself, or a cuda-exec
 #                  wrapper if it only starts inside the container
 #
@@ -13,7 +13,7 @@
 if [ -z "${CUDA_ARCH:-}" ]; then
   CUDA_ARCH=$(cuda-exec nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1 | tr -d ' .')
 fi
-CUDA_BUILD=${CUDA_BUILD:-build-cuda-sm$CUDA_ARCH}
+CUDA_BUILD=${CUDA_BUILD:-build-cuda}
 echo "--- building qsim_cuda for sm_$CUDA_ARCH in $CUDA_BUILD"
 
 mkdir -p "$CUDA_BUILD"

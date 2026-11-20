@@ -26,8 +26,7 @@ MAX_QUBITS=${MAX_QUBITS:-20}
 
 ROOT="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$ROOT"
-source env/modules.sh                     # GCC, CMake, Python + venv (does module purge)
-module load hpc-course-cuda/12.8.1
+set +u; source env/modules.sh cuda; set -u   # GCC, CMake, Python + venv, course CUDA container
 
 echo "--- node $(hostname), commit $(git rev-parse --short HEAD)"
 module list 2>&1

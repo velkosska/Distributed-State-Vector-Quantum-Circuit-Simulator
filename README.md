@@ -17,8 +17,9 @@ src/qsim/        simulator library: state vector, gates, kernels, circuit reader
 src/apps/        qsim command-line driver
 src/tools/       Python: circuit generators, Qiskit validation
 tests/           kernel unit tests (ctest)
-env/             module loads and Python requirements for the cluster
-slurm/           batch scripts (baseline, validation)
+env/             module loads and pinned Python requirements for the cluster
+slurm/           batch scripts; slurm/lib/run_harness.sh is sourced by all of them
+analysis/        pandas/matplotlib: summary tables, scaling fits, figures, scale-up estimate
 data/            generated circuits (not committed; examples/ only)
 results/         job output: metadata, CSVs, plots
 docs/            circuit format, kernel API for the parallel backends
@@ -90,12 +91,21 @@ Each job writes `results/baseline/<jobid>/meta.txt` (git commit, `module
 list`, node, CPU, seeds, exact commands), `runs.csv` (one row per run) and
 per-gate timing CSVs in `raw/`.
 
+## Experiments and figures
+
+All job scripts (`baseline`, `openmp_scaling`, `mpi_scaling`, `sensitivity`,
+`cuda`, `stream`) source the same harness, so every run of every backend lands
+in the same `runs.csv` format ([`results/README.md`](results/README.md)).
+`python3 analysis/make_figures.py` turns all of them into tables and figures.
+[`REPRODUCE.md`](REPRODUCE.md) goes from a fresh clone to every figure.
+
 ## For the parallel backends
 
 Read [`docs/kernel_api.md`](docs/kernel_api.md): it describes the pair-index
 kernel loop, where the OpenMP pragma goes, how MPI ranks map to global qubits
 and which kernel to call after an exchange, and how the CUDA port mirrors the
-same kernels.
+same kernels. The MPI backend itself (build, options, remapping) is described in
+[`docs/mpi_backend.md`](docs/mpi_backend.md).
 
 ## Team
 
