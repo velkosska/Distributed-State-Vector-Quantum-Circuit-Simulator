@@ -5,6 +5,7 @@ cmake-build-*/
 
 # python
 __pycache__/
+.pytest_cache/
 *.pyc
 env/.venv/
 
