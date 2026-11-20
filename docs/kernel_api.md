@@ -87,6 +87,10 @@ the rank number).
 `__host__ __device__`). Keep the state on the device for the whole circuit and
 dispatch with the same `switch` as `apply_gate`; time host↔device copies
 separately.
+Implemented in `src/qsim/cuda/cuda_sim.cu` (app `qsim_cuda`, CMake option
+`-DQSIM_CUDA=ON`, default arch 89). Its `SUMMARY` line adds `h2d_s` and
+`d2h_s`; `total_s` is gate time only. Build + validate on the cluster with
+`sbatch slurm/cuda_validate.sbatch`.
 
 **Gate fusion.** `fuse()` in `fusion.cpp` runs before `run()`. Mode `none`
 returns the list unchanged; mode `1q` is reserved for merging consecutive
