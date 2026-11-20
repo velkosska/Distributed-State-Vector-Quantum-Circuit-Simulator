@@ -7,6 +7,8 @@
 #SBATCH --mem=80G                # 32 qubits = 64 GiB state, also held on the host
 #SBATCH --time=04:00:00
 #SBATCH --output=slurm-%x-%j.out
+#SBATCH --requeue                # student jobs can be preempted; Slurm requeues the job ...
+#SBATCH --open-mode=append       # ... and it resumes: finished runs are skipped, the log is kept
 #
 # 1 GPU vs the CPU cores we are allowed on the same node: QFT, Grover and
 # random circuits, REPEATS runs each, fixed seeds.
@@ -20,6 +22,10 @@
 #   sbatch --cpus-per-task=16 slurm/cuda.sbatch                               # more CPU cores
 #   GPU_QUBITS="20 24" CPU_QUBITS="20 24" REPEATS=1 sbatch slurm/cuda.sbatch   # quick test
 #   RUN_CPU=0 sbatch slurm/cuda.sbatch                                        # GPU only
+#   RESUME_DIR=results/cuda/12345 sbatch slurm/cuda.sbatch                    # finish an old job's runs
+#
+# Resumable: a run whose (device, kind, qubits, repeat) row is already in
+# runs.csv is skipped, so a preempted + requeued job continues where it stopped.
 #
 # Output: results/cuda/<jobid>/{meta.txt, runs.csv, speedup.csv, raw/}
 #   runs.csv:    one row per run (total_s = gate time only, h2d_s/d2h_s = GPU copies)
@@ -47,7 +53,7 @@ module load hpc-course-cuda/12.8.1
 export CUDA_MODULE_LOADING=EAGER
 
 JOBID=${SLURM_JOB_ID:-local-$(date +%Y%m%d-%H%M%S)}
-OUT="results/cuda/$JOBID"
+OUT=${RESUME_DIR:-results/cuda/$JOBID}
 mkdir -p "$OUT/raw" data/cuda
 
 # ---------------------------------------------------------------- build
@@ -62,6 +68,14 @@ if [ "$RUN_CPU" = 1 ]; then
 fi
 
 # ---------------------------------------------------------------- metadata
+if [ -f "$OUT/meta.txt" ]; then
+  # Requeued or resumed: keep what is there, note the restart (may be another node).
+  {
+    echo "--- restart $(date -Iseconds) job $JOBID (restart count ${SLURM_RESTART_COUNT:-0}) on $(hostname)"
+    echo "git_commit:    $(git rev-parse --verify -q HEAD || echo unknown)"
+    cuda-exec nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
+  } >> "$OUT/meta.txt"
+else
 {
   echo "job_id:        $JOBID"
   echo "date:          $(date -Iseconds)"
@@ -88,8 +102,13 @@ fi
   cuda-exec nvidia-smi
   echo "--- commands"
 } > "$OUT/meta.txt"
+fi
 
-echo "device,kind,qubits,repeat,seed,gates,total_s,mean_gate_s,h2d_s,d2h_s,norm_err,threads,circuit" > "$OUT/runs.csv"
+[ -f "$OUT/runs.csv" ] ||
+  echo "device,kind,qubits,repeat,seed,gates,total_s,mean_gate_s,h2d_s,d2h_s,norm_err,threads,host,circuit" > "$OUT/runs.csv"
+
+# done DEVICE KIND N REPEAT -> true if that run is already in runs.csv
+done_already() { grep -q "^$1,$2,$3,$4," "$OUT/runs.csv"; }
 
 # make_circuit KIND N -> prints the circuit path (generated once, reused by GPU and CPU)
 make_circuit() {
@@ -108,11 +127,15 @@ make_circuit() {
 # run_one DEVICE THREADS KIND N REPEAT CMD... -> runs CMD, appends one row to runs.csv
 run_one() {
   local device=$1 threads=$2 kind=$3 n=$4 r=$5; shift 5
+  if done_already "$device" "$kind" "$n" "$r"; then
+    echo "[$(date +%T)] $device $kind n=$n rep=$r already done, skipping"
+    return
+  fi
   echo "$*" >> "$OUT/meta.txt"
   local line
   line=$("$@" | tee -a "$OUT/raw/stdout_${device}.txt" | grep '^SUMMARY')
   get() { sed -n "s/.* $1=\([^ ]*\).*/\1/p" <<<"$line"; }
-  echo "$device,$kind,$n,$r,$SEED,$(get gates_run),$(get total_s),$(get mean_gate_s),$(get h2d_s),$(get d2h_s),$(get norm_err),$threads,${@: -1}" \
+  echo "$device,$kind,$n,$r,$SEED,$(get gates_run),$(get total_s),$(get mean_gate_s),$(get h2d_s),$(get d2h_s),$(get norm_err),$threads,$(hostname),${@: -1}" \
     >> "$OUT/runs.csv"
   echo "[$(date +%T)] $device $kind n=$n rep=$r total_s=$(get total_s)"
 }
@@ -122,7 +145,10 @@ for kind in $KINDS; do
   for n in $GPU_QUBITS; do
     circ=$(make_circuit "$kind" "$n")
     # One run with per-gate timing (GB/s per gate); not counted in runs.csv.
-    "$QSIM_CUDA_BIN" "$circ" --quiet --timing "$OUT/raw/gpu_${kind}_${n}_gates.csv" >/dev/null
+    gates_csv="$OUT/raw/gpu_${kind}_${n}_gates.csv"
+    if [ ! -s "$gates_csv" ]; then
+      "$QSIM_CUDA_BIN" "$circ" --quiet --timing "$gates_csv.tmp" >/dev/null && mv "$gates_csv.tmp" "$gates_csv"
+    fi
     # Timed repeats without per-gate syncs, so total_s is pure back-to-back kernel time.
     for r in $(seq 1 "$REPEATS"); do
       run_one gpu 0 "$kind" "$n" "$r" "$QSIM_CUDA_BIN" --quiet --no-gate-timing "$circ"
