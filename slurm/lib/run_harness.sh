@@ -41,6 +41,13 @@ _h_csv()  { # quote a CSV field only if needed
 }
 _h_section() { _h_meta ""; _h_meta "--- $*"; }
 
+harness_load_modules() {
+  if [ "${HARNESS_SKIP_MODULES:-0}" != 1 ] && [ "${HARNESS_MODULES_LOADED:-0}" != 1 ] && [ -f env/modules.sh ]; then
+    set +u; source env/modules.sh ""; set -u
+    HARNESS_MODULES_LOADED=1
+  fi
+}
+
 # ------------------------------------------------------------------ init
 # harness_init EXPERIMENT
 harness_init() {
@@ -52,10 +59,7 @@ harness_init() {
   cd "$HARNESS_ROOT" || _h_die "cannot cd to $HARNESS_ROOT"
   [ -f src/tools/gen_circuits.py ] || _h_die "$HARNESS_ROOT is not the repo root (submit jobs from the repo root)"
 
-  if [ "${HARNESS_SKIP_MODULES:-0}" != 1 ] && [ -f env/modules.sh ]; then
-    # modules + venv. Explicit empty argument: otherwise `source` would see harness_init's arguments
-    set +u; source env/modules.sh ""; set -u
-  fi
+  harness_load_modules
 
   QSIM_BIN=${QSIM_BIN:-build/qsim}
   LAUNCHER=${LAUNCHER:-}
@@ -221,7 +225,9 @@ harness_run() {
   # shellcheck disable=SC2206  # word splitting of QSIM_ARGS / launch is intended
   local cmd=(${k[launch]} "$QSIM_BIN" "${k[circuit]}" "${qargs[@]}" $QSIM_ARGS "${extra[@]}")
 
-  _h_meta "$id  OMP_NUM_THREADS=${OMP_NUM_THREADS:-} ${cmd[*]}"
+  local command_line
+  printf -v command_line '%q ' "${cmd[@]}"
+  _h_meta "$id  OMP_NUM_THREADS=${OMP_NUM_THREADS:-}${OMP_PROC_BIND:+ OMP_PROC_BIND=$OMP_PROC_BIND}${OMP_PLACES:+ OMP_PLACES=$OMP_PLACES} $command_line"
   local t0 t1 rc=0
   t0=$(date +%s.%N)
   "${cmd[@]}" > "$HARNESS_OUT/raw/$stem.out" 2> "$HARNESS_OUT/raw/$stem.err" || rc=$?

@@ -99,6 +99,11 @@ in the same `runs.csv` format ([`results/README.md`](results/README.md)).
 `python3 analysis/make_figures.py` turns all of them into tables and figures.
 [`REPRODUCE.md`](REPRODUCE.md) goes from a fresh clone to every figure.
 
+Use `sbatch slurm/omp_scaling.sbatch` for 28-qubit OpenMP strong scaling with
+both core bindings and `sbatch slurm/omp_profile.sbatch` for LIKWID gate
+measurements and a same-node STREAM roofline. The cluster requirements and
+result files are listed in [`REPRODUCE.md`](REPRODUCE.md#openmp-results-and-cpu-profiling).
+
 ## For the parallel backends
 
 Read [`docs/kernel_api.md`](docs/kernel_api.md): it describes the pair-index

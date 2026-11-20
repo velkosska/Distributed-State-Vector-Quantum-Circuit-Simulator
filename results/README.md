@@ -9,10 +9,12 @@ harness [`slurm/lib/run_harness.sh`](../slurm/lib/run_harness.sh):
 | `runs.csv` | one row per qsim run, parsed from the `SUMMARY` line (schema below) |
 | `raw/` | per-gate timing CSVs (`<run>.gates.csv`: `index,gate,q0,q1,theta,seconds,bytes,gbps`), stdout/stderr of every run, generator log. Ignored by git |
 | `circuit_analysis.csv` | sensitivity job only: `analyze_circuit.py` table per circuit (local / global_free / comm gates) |
-| `stream.csv` | stream job only: measured memory bandwidth per thread count |
+| `stream.csv` | standalone STREAM job bandwidth per thread count |
+| `speedup.csv`, `efficiency.csv` | OpenMP strong-scaling medians and repeat bounds by circuit, binding and thread count |
+| `profile_runs.csv`, `gate_bandwidth.csv`, `stream.csv`, `roofline.pdf`, `roofline.png` | `omp_profile` job outputs for matched LIKWID and STREAM triad measurements |
 
-Experiments: `baseline`, `openmp_strong`, `openmp_weak`, `mpi_strong`,
-`mpi_weak`, `sensitivity`, `cuda`, `stream`. Jobs started outside Slurm get the
+Experiments: `baseline`, `openmp_strong`, `openmp_weak`, `omp_profile`,
+`mpi_strong`, `mpi_weak`, `sensitivity`, `cuda`, `stream`. Jobs started outside Slurm get the
 id `local-<date>-<pid>`; the analysis skips them unless `--include-local`.
 
 ## runs.csv columns

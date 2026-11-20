@@ -64,6 +64,13 @@ sbatch slurm/validate.sbatch                     # Qiskit comparison, 2..20 qubi
 ```
 
 Every backend must pass before its timings are used (`QSIM_BIN=build-omp/qsim sbatch slurm/validate.sbatch`, ...).
+For OpenMP with pinned workers:
+
+```bash
+QSIM_BIN=build-omp/qsim OMP_NUM_THREADS=4 OMP_DYNAMIC=false OMP_PLACES=cores \
+  OMP_PROC_BIND=close sbatch slurm/validate.sbatch
+```
+
 For MPI: `QSIM_BIN=build-mpi/qsim_mpi LAUNCHER="srun -n 4" MIN_QUBITS=3 QSIM_MODULES_EXTRA=mpi sbatch --ntasks=4 --cpus-per-task=1 slurm/validate.sbatch`.
 
 ## 4. Run the experiments
@@ -78,12 +85,13 @@ are in `meta.txt`.
 |---|---|---|---|
 | 4.1 | Memory bandwidth (roof) | `sbatch slurm/stream.sbatch` | roofline, bandwidth |
 | 4.2 | Serial baseline, 20–28 q | `sbatch slurm/baseline.sbatch` | time per gate vs qubits, bandwidth vs qubits |
-| 4.3 | OpenMP strong, 28 q | `MODE=strong N=28 sbatch slurm/openmp_scaling.sbatch` | strong scaling, Amdahl, roofline |
+| 4.3 | OpenMP strong, 28 q | `sbatch slurm/omp_scaling.sbatch` | close/spread speedup and efficiency |
 | 4.4 | OpenMP weak, 24 q at 1 thread | `MODE=weak N=24 sbatch slurm/openmp_scaling.sbatch` | weak scaling |
 | 4.5 | MPI strong, 30 q | `MODE=strong N=30 sbatch --nodes=4 slurm/mpi_scaling.sbatch` | strong scaling, Amdahl |
 | 4.6 | MPI weak, 28 q at 1 rank | `MODE=weak N=28 sbatch --nodes=8 slurm/mpi_scaling.sbatch` | weak scaling, scale-up plan |
 | 4.7 | Communication sensitivity | `sbatch slurm/sensitivity.sbatch` (N=30, P=16) | sensitivity |
 | 4.8 | CUDA, 20–30 q | `sbatch slurm/cuda.sbatch` | time per gate vs qubits |
+| 4.9 | CPU gate counters and matched STREAM triad | `sbatch slurm/omp_profile.sbatch` | measured DRAM bandwidth and CPU roofline |
 
 Set `--cpus-per-task` in `openmp_scaling.sbatch` and `stream.sbatch` to the
 core count of one node *(site)*. For the sensitivity job, turn the MPI qubit
@@ -99,6 +107,35 @@ THREADS="1 2" N=12 bash slurm/openmp_scaling.sbatch
 
 Check a finished job: `tail -3 results/<experiment>/<jobid>/meta.txt` shows
 `runs:` and `failed_runs:`; the job exits non-zero if any run failed.
+
+### OpenMP results and CPU profiling
+
+Both jobs build on their allocated node with the modules from
+`env/modules.sh`. If the node has more than 64 physical cores, submit with
+`--cpus-per-task=<physical cores per node>` so the OpenMP runtime sees places
+across the node. Both jobs use one allowed hardware thread per physical core.
+The scaling job defaults to 1, 2, 4, 8, 16, 32 and 64 threads and writes
+`speedup.csv` and `efficiency.csv` under `results/openmp_strong/<jobid>/`.
+
+The profiling job needs LIKWID with its headers, library and access to the
+compute node's memory-controller counters. Set `QSIM_MODULES_EXTRA` to the
+site's LIKWID module or use an existing installation from `PATH`. For a
+non-module installation in a custom prefix, set `LIKWID_ROOT` as well.
+`LIKWID_GROUP=MEM` selects the memory-only group when the default `MEM_DP`
+group is unavailable or cannot use the site's counters.
+
+```bash
+QSIM_MODULES_EXTRA='<site LIKWID module>' sbatch slurm/omp_profile.sbatch
+# A thread sweep for the bandwidth comparison can use PROFILE_THREADS="1 8 32 64".
+```
+
+The job profiles H, RZ, CX and STREAM triad under both bindings on the same
+node at 64 threads by default. It writes the LIKWID output and commands
+alongside `profile_runs.csv`, `gate_bandwidth.csv`, `stream.csv`,
+`roofline.pdf` and `roofline.png` in `results/omp_profile/<jobid>/`.
+To add a compute ceiling, rerun
+`python3 analysis/cpu_roofline.py results/omp_profile/<jobid> --peak-gflops-per-core <FP64 peak>`
+with the node's documented per-core FP64 peak in GFLOP/s.
 
 ## 5. Make the tables and figures
 
