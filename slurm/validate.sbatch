@@ -20,4 +20,4 @@ OUT="results/validation/$JOBID"
 mkdir -p "$OUT"
 git rev-parse --verify -q HEAD > "$OUT/git_commit.txt" || echo unknown > "$OUT/git_commit.txt"
 python3 src/tools/validate_qiskit.py --qsim "${QSIM_BIN:-build/qsim}" \
-  --max-qubits "${MAX_QUBITS:-20}" --tol 1e-10 --csv "$OUT/validation.csv" | tee "$OUT/validation.txt"
+  --launcher "${LAUNCHER:-}" --min-qubits "${MIN_QUBITS:-2}" --max-qubits "${MAX_QUBITS:-20}" --tol 1e-10 --csv "$OUT/validation.csv" | tee "$OUT/validation.txt"

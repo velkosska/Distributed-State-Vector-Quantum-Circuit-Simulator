@@ -51,9 +51,10 @@ cmake --build build-omp -j
 ctest --test-dir build                           # kernel unit tests
 ```
 
-MPI (`build-mpi/qsim_mpi`) and CUDA (`build-cuda/qsim_cuda`) builds: follow the
-build notes of those backends (Edard / Emma), with `source env/modules.sh mpi`
-or `source env/modules.sh cuda` first. The job scripts expect exactly these
+MPI (`build-mpi/qsim_mpi`): `source env/modules.sh mpi`, then
+`cmake -S . -B build-mpi -DQSIM_MPI=ON -DQSIM_OPENMP=ON && cmake --build build-mpi -j`
+([`docs/mpi_backend.md`](docs/mpi_backend.md)). CUDA (`build-cuda/qsim_cuda`):
+follow Emma's build notes, with `source env/modules.sh cuda` first. The job scripts expect exactly these
 binary paths; override with `QSIM_BIN=...`.
 
 ## 3. Check correctness
@@ -63,6 +64,7 @@ sbatch slurm/validate.sbatch                     # Qiskit comparison, 2..20 qubi
 ```
 
 Every backend must pass before its timings are used (`QSIM_BIN=build-omp/qsim sbatch slurm/validate.sbatch`, ...).
+For MPI: `QSIM_BIN=build-mpi/qsim_mpi LAUNCHER="srun -n 4" MIN_QUBITS=3 QSIM_MODULES_EXTRA=mpi sbatch --ntasks=4 --cpus-per-task=1 slurm/validate.sbatch`.
 
 ## 4. Run the experiments
 
