@@ -103,7 +103,7 @@ def main() -> int:
     with open(out, "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(cols)
-        print(f"{'kind':7}{'n':>4}{'gpu_s':>10}{'cpu_s':>10}{'speedup':>8}{'h2d_s':>8}{'d2h_s':>8}"
+        print(f"{'kind':7}{'n':>4}{'gpu_s':>11}{'cpu_s':>11}{'speedup':>9}{'h2d_s':>11}{'d2h_s':>11}"
               f"{'xfer%':>7}{'gpuGB/s':>9}{'cpuGB/s':>9}")
         for k, n in keys:
             g, c = med(total[(k, n, "cuda")]), med(total[(k, n, "openmp")])
@@ -119,8 +119,8 @@ def main() -> int:
                 "gpu_repeats": len(total[(k, n, "cuda")]), "cpu_repeats": len(total[(k, n, "openmp")]),
             }
             w.writerow([row[c_] for c_ in cols])
-            print(f"{k:7}{n:4d}{row['gpu_s']:>10}{row['cpu_s'] or '-':>10}{row['speedup'] or '-':>8}"
-                  f"{row['h2d_s'] or '-':>8}{row['d2h_s'] or '-':>8}{row['transfer_pct'] or '-':>7}"
+            print(f"{k:7}{n:4d}{row['gpu_s']:>11}{row['cpu_s'] or '-':>11}{row['speedup'] or '-':>9}"
+                  f"{row['h2d_s'] or '-':>11}{row['d2h_s'] or '-':>11}{row['transfer_pct'] or '-':>7}"
                   f"{row['gpu_gbps'] or '-':>9}{row['cpu_gbps'] or '-':>9}")
     print(f"wrote {out} (from {len(dirs)} job dir(s): {', '.join(d.name for d in dirs)})")
     return 0
