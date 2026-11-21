@@ -54,7 +54,11 @@ export CUDA_MODULE_LOADING=EAGER
 source slurm/lib/build_cuda.sh             # -> build-cuda/qsim_cuda, sets CUDA_ARCH, QSIM_CUDA_BIN
 CPU_THREADS=${SLURM_CPUS_PER_TASK:-$(nproc)}
 if [ "$RUN_CPU" = 1 ]; then
+  # Fresh build on every job: -march=native must match this node's CPU (a binary
+  # from another node can die with "Illegal instruction"), and a stale build
+  # can survive when the file server's clock is ahead of the node's.
   echo "--- building OpenMP qsim (build-omp) on $(hostname)"
+  rm -rf build-omp
   cmake -S . -B build-omp -DQSIM_OPENMP=ON -DQSIM_NATIVE=ON -DQSIM_TESTS=OFF >/dev/null
   cmake --build build-omp -j "$CPU_THREADS" --target qsim >/dev/null
 fi
