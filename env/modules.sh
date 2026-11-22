@@ -18,7 +18,9 @@ QSIM_MOD_GCC=${QSIM_MOD_GCC:-GCC/12.3.0}
 QSIM_MOD_CMAKE=${QSIM_MOD_CMAKE:-CMake/3.26.3-GCCcore-12.3.0}
 QSIM_MOD_PYTHON=${QSIM_MOD_PYTHON:-Python/3.11.3-GCCcore-12.3.0}
 QSIM_MOD_MPI=${QSIM_MOD_MPI:-OpenMPI/4.1.5-GCC-12.3.0}
-QSIM_MOD_CUDA=${QSIM_MOD_CUDA:-CUDA/12.1.1}
+# SciTech: CUDA 12.8.1 comes as an Apptainer container; nvcc etc. run via `cuda-exec`
+# (see slurm/lib/build_cuda.sh). Only usable on GPU nodes.
+QSIM_MOD_CUDA=${QSIM_MOD_CUDA:-hpc-course-cuda/12.8.1}
 
 _qsim_env_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

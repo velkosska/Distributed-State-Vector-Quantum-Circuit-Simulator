@@ -1,0 +1,330 @@
+harness_version: 2
+experiment:      cuda
+job_id:          33869
+job_name:        qsim-cuda
+job_script:      slurm/cuda.sbatch
+start:           2026-11-21T14:01:34+01:00
+submit_host:     rust
+batch_host:      fortran
+user:            hpcb21
+
+--- git
+git_commit:      ead5cefaa734d3924912337c30dee21f23c1776d
+git_branch:      emma/cuda-bench
+git_describe:    ead5cef
+git_dirty:       no
+
+--- binary
+backend:         cuda
+qsim_bin:        build-cuda/qsim_cuda
+qsim_bin_sha256: 01a4a78d232884ba8868798d8481396166c46c8dc8163b2abb296e6b6b1b4f4d
+qsim_bin_mtime:  2026-11-21T14:01:32+01:00
+launcher:        none
+qsim_args:       none
+gate_timing:     0
+cxx:             c++ (GCC) 12.3.0
+python:          Python 3.11.3
+
+--- nodes
+nodelist:        fortran
+nodes_expanded:  fortran
+num_nodes:       1
+partition:       gpu
+account:         hpcclass
+kernel:          6.17.2-1-pve
+
+--- cpu (batch host)
+  Architecture:                            x86_64
+  CPU(s):                                  512
+  Model name:                              AMD EPYC 9755 128-Core Processor
+  Thread(s) per core:                      2
+  Core(s) per socket:                      128
+  Socket(s):                               2
+  CPU(s) scaling MHz:                      60%
+  CPU max MHz:                             4122.7549
+  L1d cache:                               12 MiB (256 instances)
+  L2 cache:                                256 MiB (256 instances)
+  L3 cache:                                1 GiB (32 instances)
+  NUMA node(s):                            2
+  NUMA node0 CPU(s):                       0-127,256-383
+  NUMA node1 CPU(s):                       128-255,384-511
+  simd_flags: fma avx avx2 avx512f avx512dq
+  mem_total: 754.9 GiB
+  cpus_allowed: 0,2,36-39,42-67,256,258,292-295,298-323
+
+--- gpu
+  index, name, memory.total [MiB], driver_version, clocks.max.sm [MHz], clocks.max.memory [MHz]
+  0, NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 580.126.09, 2430 MHz, 12481 MHz
+
+--- module list
+  
+  Currently Loaded Modules:
+    1) GCCcore/12.3.0                    7) Tcl/8.6.13-GCCcore-12.3.0
+    2) GCC/12.3.0                        8) SQLite/3.42.0-GCCcore-12.3.0
+    3) OpenSSL/1.1                       9) libffi/3.4.4-GCCcore-12.3.0
+    4) cURL/8.0.1-GCCcore-12.3.0        10) Python/3.11.3-GCCcore-12.3.0
+    5) libarchive/3.6.2-GCCcore-12.3.0  11) hpc-course-cuda/12.8.1
+    6) CMake/3.26.3-GCCcore-12.3.0
+  
+   
+  
+
+--- environment (OMP_*, KMP_*, GOMP_*, SLURM_*, MPI, UCX, CUDA, QSIM_*)
+  BACKEND=cuda
+  CUDA_MODULE_LOADING=EAGER
+  CUDA_VISIBLE_DEVICES=0
+  FI_PROVIDER=tcp
+  I_MPI_HYDRA_BOOTSTRAP=slurm
+  I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS=--external-launcher
+  OMPI_MCA_hwloc_base_use_hwthreads_as_cpus=1
+  OMPI_MCA_plm_slurm_args=--external-launcher
+  PMIX_MCA_psec=native
+  QSIM_BIN=build-cuda/qsim_cuda
+  QSIM_ROOT=/home/hpcb21/Distributed-State-Vector-Quantum-Circuit-Simulator
+  SLURM_CLUSTER_NAME=scitech
+  SLURM_CONF=/etc/slurm/slurm.conf
+  SLURM_CPUS_ON_NODE=64
+  SLURM_CPUS_PER_TASK=64
+  SLURM_GPUS_ON_NODE=1
+  SLURM_GTIDS=0
+  SLURM_JOBID=33869
+  SLURM_JOB_ACCOUNT=hpcclass
+  SLURM_JOB_CPUS_PER_NODE=64
+  SLURM_JOB_DEPENDENCY=afterok:33867
+  SLURM_JOB_END_TIME=1795273287
+  SLURM_JOB_GID=1000000
+  SLURM_JOB_GPUS=0
+  SLURM_JOB_ID=33869
+  SLURM_JOB_NAME=qsim-cuda
+  SLURM_JOB_NODELIST=fortran
+  SLURM_JOB_NUM_NODES=1
+  SLURM_JOB_PARTITION=gpu
+  SLURM_JOB_QOS=student
+  SLURM_JOB_START_TIME=1795266087
+  SLURM_JOB_UID=1000208
+  SLURM_LOCALID=0
+  SLURM_MEM_PER_NODE=81920
+  SLURM_NNODES=1
+  SLURM_NODEID=0
+  SLURM_NODELIST=fortran
+  SLURM_OOM_KILL_STEP=0
+  SLURM_OPEN_MODE=a
+  SLURM_PRIO_PROCESS=0
+  SLURM_PROCID=0
+  SLURM_SUBMIT_DIR=/home/hpcb21/Distributed-State-Vector-Quantum-Circuit-Simulator
+  SLURM_SUBMIT_HOST=rust
+  SLURM_TASKS_PER_NODE=1
+  SLURM_TASK_PID=1581496
+  SLURM_TOPOLOGY_ADDR=fortran
+  SLURM_TOPOLOGY_ADDR_PATTERN=node
+  SLURM_TRES_PER_TASK=cpu=64
+  UCX_TLS=tcp,sm,self
+
+--- circuits (generator command, sha256)
+
+--- cuda experiment
+cuda_arch:       sm_120
+gpu_binary:      build-cuda/qsim_cuda (backend=cuda)
+cpu_binary:      build-omp/qsim (backend=openmp, 64 threads)
+gpu_qubits:      20 22 24 26 28 30 31 32
+cpu_qubits:      20 22 24 26 28 30 (run_cpu=1)
+resumed_from:    none
+f25944c04540c93a  python3 src/tools/gen_circuits.py qft -n 20 --seed 1 -o data/cuda/qft_20_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_20_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_20q.gates.csv
+r0001  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_20_seed_1.txt --no-gate-timing
+r0002  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_20_seed_1.txt --no-gate-timing
+r0003  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_20_seed_1.txt --no-gate-timing
+731efc50e2913e50  python3 src/tools/gen_circuits.py qft -n 22 --seed 1 -o data/cuda/qft_22_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_22_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_22q.gates.csv
+r0004  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_22_seed_1.txt --no-gate-timing
+r0005  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_22_seed_1.txt --no-gate-timing
+r0006  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_22_seed_1.txt --no-gate-timing
+9659007a61e24f57  python3 src/tools/gen_circuits.py qft -n 24 --seed 1 -o data/cuda/qft_24_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_24_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_24q.gates.csv
+r0007  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_24_seed_1.txt --no-gate-timing
+r0008  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_24_seed_1.txt --no-gate-timing
+r0009  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_24_seed_1.txt --no-gate-timing
+976d1f28b629a495  python3 src/tools/gen_circuits.py qft -n 26 --seed 1 -o data/cuda/qft_26_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_26_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_26q.gates.csv
+r0010  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_26_seed_1.txt --no-gate-timing
+r0011  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_26_seed_1.txt --no-gate-timing
+r0012  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_26_seed_1.txt --no-gate-timing
+3bdf485d73c86438  python3 src/tools/gen_circuits.py qft -n 28 --seed 1 -o data/cuda/qft_28_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_28_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_28q.gates.csv
+r0013  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_28_seed_1.txt --no-gate-timing
+r0014  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_28_seed_1.txt --no-gate-timing
+r0015  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_28_seed_1.txt --no-gate-timing
+514134374cded2e2  python3 src/tools/gen_circuits.py qft -n 30 --seed 1 -o data/cuda/qft_30_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_30_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_30q.gates.csv
+r0016  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_30_seed_1.txt --no-gate-timing
+r0017  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_30_seed_1.txt --no-gate-timing
+r0018  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_30_seed_1.txt --no-gate-timing
+5860d27563c6863b  python3 src/tools/gen_circuits.py qft -n 31 --seed 1 -o data/cuda/qft_31_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_31_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_31q.gates.csv
+r0019  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_31_seed_1.txt --no-gate-timing
+r0020  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_31_seed_1.txt --no-gate-timing
+r0021  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_31_seed_1.txt --no-gate-timing
+9098abe1dc7c0e38  python3 src/tools/gen_circuits.py qft -n 32 --seed 1 -o data/cuda/qft_32_seed_1.txt
+gates  build-cuda/qsim_cuda data/cuda/qft_32_seed_1.txt --quiet --timing results/cuda/33869/raw/gpu_qft_32q.gates.csv
+r0022  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_32_seed_1.txt --no-gate-timing
+r0023  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_32_seed_1.txt --no-gate-timing
+r0024  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/qft_32_seed_1.txt --no-gate-timing
+b5f593c2505a7b99  python3 src/tools/gen_circuits.py grover -n 20 --seed 1 --iterations 1 -o data/cuda/grover_20_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_20_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_20q.gates.csv
+r0025  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+r0026  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+r0027  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+e4b2de2b5ff41602  python3 src/tools/gen_circuits.py grover -n 22 --seed 1 --iterations 1 -o data/cuda/grover_22_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_22_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_22q.gates.csv
+r0028  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+r0029  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+r0030  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+6de6793a4283a017  python3 src/tools/gen_circuits.py grover -n 24 --seed 1 --iterations 1 -o data/cuda/grover_24_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_24_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_24q.gates.csv
+r0031  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+r0032  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+r0033  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+cae07fcfb22bb1ef  python3 src/tools/gen_circuits.py grover -n 26 --seed 1 --iterations 1 -o data/cuda/grover_26_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_26_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_26q.gates.csv
+r0034  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+r0035  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+r0036  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+d2b13fc9181aa7b2  python3 src/tools/gen_circuits.py grover -n 28 --seed 1 --iterations 1 -o data/cuda/grover_28_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_28_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_28q.gates.csv
+r0037  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+r0038  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+r0039  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+f30a4868a5d92735  python3 src/tools/gen_circuits.py grover -n 30 --seed 1 --iterations 1 -o data/cuda/grover_30_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_30_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_30q.gates.csv
+r0040  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+r0041  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+r0042  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+b4eeb33694f08b7a  python3 src/tools/gen_circuits.py grover -n 31 --seed 1 --iterations 1 -o data/cuda/grover_31_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_31_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_31q.gates.csv
+r0043  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_31_seed_1_iterations_1.txt --no-gate-timing
+r0044  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_31_seed_1_iterations_1.txt --no-gate-timing
+r0045  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_31_seed_1_iterations_1.txt --no-gate-timing
+6f6c75ad57cfda29  python3 src/tools/gen_circuits.py grover -n 32 --seed 1 --iterations 1 -o data/cuda/grover_32_seed_1_iterations_1.txt
+gates  build-cuda/qsim_cuda data/cuda/grover_32_seed_1_iterations_1.txt --quiet --timing results/cuda/33869/raw/gpu_grover_32q.gates.csv
+r0046  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_32_seed_1_iterations_1.txt --no-gate-timing
+r0047  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_32_seed_1_iterations_1.txt --no-gate-timing
+r0048  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/grover_32_seed_1_iterations_1.txt --no-gate-timing
+09a95dd8bed10131  python3 src/tools/gen_circuits.py random -n 20 --seed 1 --depth 10 -o data/cuda/random_20_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_20_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_20q.gates.csv
+r0049  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+r0050  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+r0051  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+bd7694407affe94d  python3 src/tools/gen_circuits.py random -n 22 --seed 1 --depth 10 -o data/cuda/random_22_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_22_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_22q.gates.csv
+r0052  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+r0053  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+r0054  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+9755ff310899ab39  python3 src/tools/gen_circuits.py random -n 24 --seed 1 --depth 10 -o data/cuda/random_24_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_24_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_24q.gates.csv
+r0055  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+r0056  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+r0057  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+141cd1306edd355a  python3 src/tools/gen_circuits.py random -n 26 --seed 1 --depth 10 -o data/cuda/random_26_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_26_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_26q.gates.csv
+r0058  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+r0059  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+r0060  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+63fbbd131527a51d  python3 src/tools/gen_circuits.py random -n 28 --seed 1 --depth 10 -o data/cuda/random_28_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_28_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_28q.gates.csv
+r0061  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+r0062  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+r0063  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/cuda/random_30_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_30_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_30q.gates.csv
+r0064  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+r0065  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+r0066  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+6eb5e7d9e3afb63c  python3 src/tools/gen_circuits.py random -n 31 --seed 1 --depth 10 -o data/cuda/random_31_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_31_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_31q.gates.csv
+r0067  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_31_seed_1_depth_10.txt --no-gate-timing
+r0068  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_31_seed_1_depth_10.txt --no-gate-timing
+r0069  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_31_seed_1_depth_10.txt --no-gate-timing
+a14d59c553337bc4  python3 src/tools/gen_circuits.py random -n 32 --seed 1 --depth 10 -o data/cuda/random_32_seed_1_depth_10.txt
+gates  build-cuda/qsim_cuda data/cuda/random_32_seed_1_depth_10.txt --quiet --timing results/cuda/33869/raw/gpu_random_32q.gates.csv
+r0070  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_32_seed_1_depth_10.txt --no-gate-timing
+r0071  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_32_seed_1_depth_10.txt --no-gate-timing
+r0072  OMP_NUM_THREADS=1 build-cuda/qsim_cuda data/cuda/random_32_seed_1_depth_10.txt --no-gate-timing
+cpu runs: OMP_NUM_THREADS=64 OMP_PROC_BIND=spread OMP_PLACES=cores
+f25944c04540c93a  python3 src/tools/gen_circuits.py qft -n 20 --seed 1 -o data/cuda/qft_20_seed_1.txt
+r0073  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_20_seed_1.txt --no-gate-timing
+r0074  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_20_seed_1.txt --no-gate-timing
+r0075  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_20_seed_1.txt --no-gate-timing
+731efc50e2913e50  python3 src/tools/gen_circuits.py qft -n 22 --seed 1 -o data/cuda/qft_22_seed_1.txt
+r0076  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_22_seed_1.txt --no-gate-timing
+r0077  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_22_seed_1.txt --no-gate-timing
+r0078  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_22_seed_1.txt --no-gate-timing
+9659007a61e24f57  python3 src/tools/gen_circuits.py qft -n 24 --seed 1 -o data/cuda/qft_24_seed_1.txt
+r0079  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_24_seed_1.txt --no-gate-timing
+r0080  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_24_seed_1.txt --no-gate-timing
+r0081  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_24_seed_1.txt --no-gate-timing
+976d1f28b629a495  python3 src/tools/gen_circuits.py qft -n 26 --seed 1 -o data/cuda/qft_26_seed_1.txt
+r0082  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_26_seed_1.txt --no-gate-timing
+r0083  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_26_seed_1.txt --no-gate-timing
+r0084  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_26_seed_1.txt --no-gate-timing
+3bdf485d73c86438  python3 src/tools/gen_circuits.py qft -n 28 --seed 1 -o data/cuda/qft_28_seed_1.txt
+r0085  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_28_seed_1.txt --no-gate-timing
+r0086  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_28_seed_1.txt --no-gate-timing
+r0087  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_28_seed_1.txt --no-gate-timing
+514134374cded2e2  python3 src/tools/gen_circuits.py qft -n 30 --seed 1 -o data/cuda/qft_30_seed_1.txt
+r0088  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_30_seed_1.txt --no-gate-timing
+r0089  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_30_seed_1.txt --no-gate-timing
+r0090  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/qft_30_seed_1.txt --no-gate-timing
+b5f593c2505a7b99  python3 src/tools/gen_circuits.py grover -n 20 --seed 1 --iterations 1 -o data/cuda/grover_20_seed_1_iterations_1.txt
+r0091  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+r0092  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+r0093  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_20_seed_1_iterations_1.txt --no-gate-timing
+e4b2de2b5ff41602  python3 src/tools/gen_circuits.py grover -n 22 --seed 1 --iterations 1 -o data/cuda/grover_22_seed_1_iterations_1.txt
+r0094  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+r0095  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+r0096  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_22_seed_1_iterations_1.txt --no-gate-timing
+6de6793a4283a017  python3 src/tools/gen_circuits.py grover -n 24 --seed 1 --iterations 1 -o data/cuda/grover_24_seed_1_iterations_1.txt
+r0097  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+r0098  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+r0099  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_24_seed_1_iterations_1.txt --no-gate-timing
+cae07fcfb22bb1ef  python3 src/tools/gen_circuits.py grover -n 26 --seed 1 --iterations 1 -o data/cuda/grover_26_seed_1_iterations_1.txt
+r0100  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+r0101  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+r0102  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_26_seed_1_iterations_1.txt --no-gate-timing
+d2b13fc9181aa7b2  python3 src/tools/gen_circuits.py grover -n 28 --seed 1 --iterations 1 -o data/cuda/grover_28_seed_1_iterations_1.txt
+r0103  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+r0104  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+r0105  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_28_seed_1_iterations_1.txt --no-gate-timing
+f30a4868a5d92735  python3 src/tools/gen_circuits.py grover -n 30 --seed 1 --iterations 1 -o data/cuda/grover_30_seed_1_iterations_1.txt
+r0106  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+r0107  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+r0108  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/grover_30_seed_1_iterations_1.txt --no-gate-timing
+09a95dd8bed10131  python3 src/tools/gen_circuits.py random -n 20 --seed 1 --depth 10 -o data/cuda/random_20_seed_1_depth_10.txt
+r0109  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+r0110  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+r0111  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_20_seed_1_depth_10.txt --no-gate-timing
+bd7694407affe94d  python3 src/tools/gen_circuits.py random -n 22 --seed 1 --depth 10 -o data/cuda/random_22_seed_1_depth_10.txt
+r0112  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+r0113  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+r0114  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_22_seed_1_depth_10.txt --no-gate-timing
+9755ff310899ab39  python3 src/tools/gen_circuits.py random -n 24 --seed 1 --depth 10 -o data/cuda/random_24_seed_1_depth_10.txt
+r0115  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+r0116  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+r0117  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_24_seed_1_depth_10.txt --no-gate-timing
+141cd1306edd355a  python3 src/tools/gen_circuits.py random -n 26 --seed 1 --depth 10 -o data/cuda/random_26_seed_1_depth_10.txt
+r0118  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+r0119  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+r0120  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_26_seed_1_depth_10.txt --no-gate-timing
+63fbbd131527a51d  python3 src/tools/gen_circuits.py random -n 28 --seed 1 --depth 10 -o data/cuda/random_28_seed_1_depth_10.txt
+r0121  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+r0122  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+r0123  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_28_seed_1_depth_10.txt --no-gate-timing
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/cuda/random_30_seed_1_depth_10.txt
+r0124  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+r0125  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+r0126  OMP_NUM_THREADS=64 build-omp/qsim data/cuda/random_30_seed_1_depth_10.txt --no-gate-timing
+
+--- end
+end:             2026-11-21T14:34:54+01:00
+elapsed_s:       2000
+runs:            126
+failed_runs:     0

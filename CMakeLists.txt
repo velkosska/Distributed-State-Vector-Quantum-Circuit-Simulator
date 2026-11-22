@@ -22,6 +22,22 @@ if(QSIM_NATIVE)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-march=native>)
 endif()
 
+# Run-time libraries of the compiler we build with. On the cluster (EESSI) the
+# GCC module does not put its own libstdc++/libgomp on the loader path, so a
+# binary would pick up an older system libstdc++ at run time and fail with
+# "GLIBCXX_3.4.29 not found". Embedding the compiler's lib dir fixes that for
+# every binary, independent of the environment the job runs in.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libstdc++.so
+                  OUTPUT_VARIABLE _qsim_libstdcxx OUTPUT_STRIP_TRAILING_WHITESPACE)
+  get_filename_component(_qsim_gcc_libdir "${_qsim_libstdcxx}" DIRECTORY)
+  if(IS_ABSOLUTE "${_qsim_gcc_libdir}" AND IS_DIRECTORY "${_qsim_gcc_libdir}")
+    get_filename_component(_qsim_gcc_libdir "${_qsim_gcc_libdir}" REALPATH)
+    add_link_options("LINKER:-rpath,${_qsim_gcc_libdir}")
+    message(STATUS "qsim: rpath to compiler runtime ${_qsim_gcc_libdir}")
+  endif()
+endif()
+
 add_library(qsim_core
   src/qsim/circuit.cpp
   src/qsim/gates.cpp

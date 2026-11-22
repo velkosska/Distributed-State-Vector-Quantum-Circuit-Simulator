@@ -16,7 +16,7 @@ cores per node). Set them once in the `#SBATCH` headers or on the command line
 | GCC | 12.3.0 | `env/modules.sh` |
 | CMake | 3.26.3 | `env/modules.sh` |
 | OpenMPI | 4.1.5 (MPI build only) | `env/modules.sh` (`mpi`) |
-| CUDA | 12.1.1 (CUDA build only) | `env/modules.sh` (`cuda`) |
+| CUDA | 12.8.1, module `hpc-course-cuda/12.8.1` (an Apptainer container: run CUDA tools via `cuda-exec`, GPU nodes only) | `env/modules.sh` (`cuda`) |
 | Python | 3.11.3 | `env/modules.sh` |
 | Python packages | exact pins | `env/requirements.txt`, full set in `env/requirements.lock` |
 | Slurm | any recent | — |
@@ -54,7 +54,10 @@ ctest --test-dir build                           # kernel unit tests
 MPI (`build-mpi/qsim_mpi`): `source env/modules.sh mpi`, then
 `cmake -S . -B build-mpi -DQSIM_MPI=ON -DQSIM_OPENMP=ON && cmake --build build-mpi -j`
 ([`docs/mpi_backend.md`](docs/mpi_backend.md)). CUDA (`build-cuda/qsim_cuda`):
-follow Emma's build notes, with `source env/modules.sh cuda` first. The job scripts expect exactly these
+it must be built on a GPU node (nvcc lives in the CUDA container), so
+`sbatch slurm/cuda_validate.sbatch` builds it for the GPU it lands on
+([`slurm/lib/build_cuda.sh`](slurm/lib/build_cuda.sh)) and validates it;
+`slurm/cuda.sbatch` rebuilds it as well. The job scripts expect exactly these
 binary paths; override with `QSIM_BIN=...`.
 
 ## 3. Check correctness
