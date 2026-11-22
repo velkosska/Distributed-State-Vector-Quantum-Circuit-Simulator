@@ -11,7 +11,9 @@
 # Nsight Compute profile of the qsim_cuda gate kernels: DRAM bytes moved, kernel
 # time and achieved memory bandwidth (also as % of the GPU's peak), per kernel.
 # Nsight Systems (nsys) is not installed on SciTech; Nsight Compute (ncu) is in
-# the course CUDA container. The host<->device transfer vs kernel split comes
+# the course CUDA container, but reading GPU performance counters is restricted
+# to admins there (ERR_NVGPUCTRPERM, job 34556), so this job only works where
+# counters are enabled. The host<->device transfer vs kernel split comes
 # from the CUDA event timers of slurm/cuda.sbatch (analysis/cuda_summary.py).
 #
 #   sbatch slurm/cuda_ncu.sbatch
@@ -66,11 +68,15 @@ cmd=(cuda-exec ncu --csv --print-units base --log-file "$OUT/ncu_raw.csv"
 } > "$OUT/meta.txt"
 
 echo "--- profiling $LAUNCHES kernel launches of $circ"
-"${cmd[@]}" 2>&1 | tee "$OUT/ncu_stdout.txt"
+# ncu writes its own messages (==PROF==, ==ERROR==) into --log-file, so a
+# failure is checked there; a non-zero exit must not end the job silently.
+"${cmd[@]}" 2>&1 | tee "$OUT/ncu_stdout.txt" || echo "ncu exited with an error, see $OUT/ncu_raw.csv" >&2
+grep -h "==ERROR==" "$OUT/ncu_raw.csv" "$OUT/ncu_stdout.txt" 2>/dev/null >&2 || true
 
 if grep -q "ERR_NVGPUCTRPERM" "$OUT/ncu_stdout.txt" "$OUT/ncu_raw.csv" 2>/dev/null; then
   echo "ERROR: no permission to read GPU performance counters (ERR_NVGPUCTRPERM)." >&2
-  echo "Ask the cluster admins to enable them for users (NVreg_RestrictProfilingToAdminUsers=0)." >&2
+  echo "Only the cluster admins can enable them (driver option NVreg_RestrictProfilingToAdminUsers=0)." >&2
+  echo "Use the CUDA event timings instead: python3 analysis/cuda_summary.py" >&2
   exit 1
 fi
 
