@@ -7,6 +7,12 @@
 
 #include "qsim/kernels.hpp"
 
+#if defined(QSIM_USE_OPENMP)
+#define QSIM_PRAGMA_FOR _Pragma("omp parallel for schedule(static)")
+#else
+#define QSIM_PRAGMA_FOR
+#endif
+
 namespace qsim::dist {
 
 namespace {
