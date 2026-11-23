@@ -1,9 +1,9 @@
 ---
 title: "A distributed state-vector quantum circuit simulator on SciTech"
-subtitle: "GroupXX · Part 2 · Final technical report and EuroHPC scale-up plan"
+subtitle: "Group 5 · Part 2 · Final technical report and EuroHPC scale-up plan"
 ---
 
-**Team:** Marija, Emma, Hurshneet, Edard, Ana-Maria · **Repository:** github.com/velkosska/Distributed-State-Vector-Quantum-Circuit-Simulator, branch `fusion-and-report` · **Code version of every result:** commit `fabbd99` (CUDA: `ead5cef`), clean tree, recorded in each job's `meta.txt` · **Reproduce:** `REPRODUCE.md`.
+**Group 5:** Ana-Maria Pintilie, Edard Hala, Emma Jiayi Liu, Hurshneet Singh Chadha, Marija Velkoska · **Repository:** github.com/velkosska/Distributed-State-Vector-Quantum-Circuit-Simulator, branch `fusion-and-report` · **Code version of every result:** commit `fabbd99` (CUDA: `ead5cef`), clean tree, recorded in each job's `meta.txt` · **Reproduce:** `REPRODUCE.md`.
 
 ## 1. Problem and motivation
 
@@ -56,7 +56,7 @@ Every kernel is a loop over a pair index *k* with no dependencies between iterat
 
 ## 5. Results
 
-**Correctness.** Serial, OpenMP (4 threads) and MPI (4 ranks) builds match Qiskit on all 168 circuits (QFT, Grover, random; 2–20 qubits), largest error 4.4 × 10⁻¹⁴ (jobs 36497–36499). The CUDA port passed the same 57-circuit check in the GPU team's run; that log is not yet committed (see §10).
+**Correctness.** Serial, OpenMP (4 threads) and MPI (4 ranks) builds match Qiskit on all 168 cases (QFT, Grover, random; 2–20 qubits), largest error 4.4 × 10⁻¹⁴ (jobs 36497–36499). The CUDA backend passes the same 57-circuit check on the RTX PRO 6000 (job 32980 on commit `5a53b81`, 57/57, `results/validation/32980/`).
 
 **Serial baseline (job 36504, 45/45 runs).** Time per gate grows 4× per two qubits from 20 to 28 qubits (QFT: 0.52 ms → 205 ms), exactly with the state size (Figure 1). At 28 qubits a dense gate streams 8 GiB in 0.2 s, ≈ 40 GB/s, which equals the one-core STREAM triad measured on the same node (41 GB/s, job 36503).
 
@@ -123,7 +123,7 @@ Bandwidth decides everything. On a node the simulator runs at the memory speed i
 
 ## 10. Reproducibility and known limitations
 
-All commands are in `REPRODUCE.md`; module versions, compiler flags, seeds, Slurm requests and exact command lines are in each `results/<experiment>/<jobid>/meta.txt`, and selected job logs in `results/logs/`. Limitations: shared nodes (repeat ranges up to 4× for MPI; 25 configurations exceed a 10 % range and are flagged in `runs_summary.csv`); one eighth of a node per user; the MPI QFT job was preempted before 32 ranks and that point is a separate rerun on the same commit; the CUDA run predates later CPU kernel changes (GPU code unchanged, CPU side may be slightly slow) and its validation log is not yet in the repository; scaling sweeps omit Grover and stop at 32 qubits to fit the shared queue.
+All commands are in `REPRODUCE.md`; module versions, compiler flags, seeds, Slurm requests and exact command lines are in each `results/<experiment>/<jobid>/meta.txt`, and selected job logs in `results/logs/`. Limitations: shared nodes (repeat ranges up to 4× for MPI; 25 configurations exceed a 10 % range and are flagged in `runs_summary.csv`); one eighth of a node per user; the MPI QFT job was preempted before 32 ranks and that point is a separate rerun on the same commit; the CUDA run predates later CPU kernel changes (GPU code unchanged, CPU side may be slightly slow); scaling sweeps omit Grover and stop at 32 qubits to fit the shared queue.
 
 \newpage
 
