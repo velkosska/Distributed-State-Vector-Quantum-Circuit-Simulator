@@ -1,0 +1,12 @@
+backend:     cuda
+host:        julia
+gpu:         NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, driver 580.126.09
+cuda_arch:   sm_120
+binary:      build-cuda/qsim_cuda (built with nvcc in the hpc-course-cuda/12.8.1 container)
+git_dirty:   not recorded (the script version at this commit did not record it)
+source:      first CUDA validation, Slurm job 32980 on 2026-11-20, run by the script at
+             commit 5a53b81, which wrote only build-cuda/validation.csv (git-ignored).
+             slurm-qsim-cuda-validate-32980.out is the original, unedited job log;
+             validation.txt is its table, validation.csv was rebuilt from that table
+             (values as printed, so rounded). Later CUDA validations write this folder
+             layout directly (slurm/cuda_validate.sbatch).
