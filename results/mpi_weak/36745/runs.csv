@@ -1,0 +1,4 @@
+run_id,experiment,job_id,backend,kind,qubits,nodes,ranks,threads,gpus,repeat,seed,depth,iterations,global_fraction,global_qubits,gates_in,gates_run,fusion,total_s,mean_gate_s,norm_err,status,tag,circuit,timing_csv
+r0001,mpi_weak,36745,mpi,random,32,1,16,2,0,1,1,10,,,,389,389,none,386.488761,0.993544372,2.39439579e-11,ok,weak,data/mpi_weak/random_32_seed_1_depth_10.txt,raw/r0001_random_32q_p16_t2_rep1.gates.csv
+r0002,mpi_weak,36745,mpi,random,32,1,16,2,0,2,1,10,,,,389,389,none,955.863149,2.45723175,2.39439579e-11,ok,weak,data/mpi_weak/random_32_seed_1_depth_10.txt,raw/r0002_random_32q_p16_t2_rep2.gates.csv
+r0003,mpi_weak,36745,mpi,random,32,1,16,2,0,3,1,10,,,,389,389,none,371.258305,0.954391529,2.39439579e-11,ok,weak,data/mpi_weak/random_32_seed_1_depth_10.txt,raw/r0003_random_32q_p16_t2_rep3.gates.csv
