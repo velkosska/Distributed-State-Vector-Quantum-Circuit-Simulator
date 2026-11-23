@@ -1,0 +1,7 @@
+circuit_path,circuit,qubits,ranks,local_qubits,gates,local,global_free,comm,pct_touching_global,pct_comm,comm_MiB_per_rank,comm_by_global_qubit
+data/sensitivity/qft_30_seed_1.txt,qft_30_seed_1.txt,30,16,26,510,388,110,12,23.92156862745098,2.3529411764705883,12288.0,q26:3 q27:3 q28:3 q29:3
+data/sensitivity/random_30_seed_1_depth_10.txt,random_30_seed_1_depth_10.txt,30,16,26,376,318,26,32,15.425531914893616,8.51063829787234,32768.0,q26:13 q27:6 q28:7 q29:6
+data/sensitivity/random_30_seed_1_depth_10_global-fraction_0_global-qubits_4.txt,random_30_seed_1_depth_10_global-fraction_0_global-qubits_4.txt,30,16,26,300,300,0,0,0.0,0.0,0.0,
+data/sensitivity/random_30_seed_1_depth_10_global-fraction_0.25_global-qubits_4.txt,random_30_seed_1_depth_10_global-fraction_0.25_global-qubits_4.txt,30,16,26,300,232,33,35,22.666666666666668,11.666666666666666,35840.0,q26:10 q27:13 q28:5 q29:7
+data/sensitivity/random_30_seed_1_depth_10_global-fraction_0.5_global-qubits_4.txt,random_30_seed_1_depth_10_global-fraction_0.5_global-qubits_4.txt,30,16,26,300,157,70,73,47.666666666666664,24.333333333333332,74752.0,q26:17 q27:26 q28:15 q29:15
+data/sensitivity/random_30_seed_1_depth_10_global-fraction_1_global-qubits_4.txt,random_30_seed_1_depth_10_global-fraction_1_global-qubits_4.txt,30,16,26,300,0,150,150,100.0,50.0,153600.0,q26:30 q27:50 q28:36 q29:34
