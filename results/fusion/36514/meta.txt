@@ -1,0 +1,194 @@
+harness_version: 2
+experiment:      fusion
+job_id:          36514
+job_name:        qsim-fusion
+job_script:      slurm/fusion.sbatch
+start:           2026-11-23T16:18:59+01:00
+submit_host:     rust
+batch_host:      julia
+user:            hpcb37
+
+--- git
+git_commit:      fabbd993c8603246c77753f4f60ce073be0b7d74
+git_branch:      fusion-and-report
+git_describe:    fabbd99
+git_dirty:       no
+
+--- binary
+backend:         openmp
+qsim_bin:        build-fusion-36514/qsim
+qsim_bin_sha256: 35c08c353d6fd1ad5eeabea94cb85505cdb1dc32f0eeb8fdccb7968e590c8df3
+qsim_bin_mtime:  2026-11-23T16:18:59+01:00
+launcher:        none
+qsim_args:       none
+gate_timing:     0
+cmake_cache:     build-fusion-36514/CMakeCache.txt
+  CMAKE_BUILD_TYPE:STRING=Release
+  CMAKE_CXX_COMPILER:FILEPATH=/cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen2/software/GCCcore/12.3.0/bin/c++
+  CMAKE_CXX_FLAGS:STRING=
+  CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+  QSIM_CUDA:BOOL=OFF
+  QSIM_LIKWID:BOOL=OFF
+  QSIM_MPI:BOOL=OFF
+  QSIM_NATIVE:BOOL=ON
+  QSIM_OPENMP:BOOL=ON
+  QSIM_TESTS:BOOL=ON
+cxx:             c++ (GCC) 12.3.0
+python:          Python 3.11.3
+
+--- nodes
+nodelist:        julia
+nodes_expanded:  julia
+num_nodes:       1
+partition:       cpu
+account:         hpcclass
+kernel:          6.17.2-1-pve
+
+--- cpu (batch host)
+  Architecture:                            x86_64
+  CPU(s):                                  512
+  Model name:                              AMD EPYC 9745 128-Core Processor
+  Thread(s) per core:                      2
+  Core(s) per socket:                      128
+  Socket(s):                               2
+  CPU(s) scaling MHz:                      54%
+  CPU max MHz:                             3709.0911
+  L1d cache:                               12 MiB (256 instances)
+  L2 cache:                                256 MiB (256 instances)
+  L3 cache:                                512 MiB (16 instances)
+  NUMA node(s):                            2
+  NUMA node0 CPU(s):                       0-127,256-383
+  NUMA node1 CPU(s):                       128-255,384-511
+  simd_flags: fma avx avx2 avx512f avx512dq
+  mem_total: 502.9 GiB
+  cpus_allowed: 38-69,294-325
+
+--- gpu
+  No devices were found
+
+--- module list
+  
+  Currently Loaded Modules:
+    1) GCCcore/12.3.0                    6) CMake/3.26.3-GCCcore-12.3.0
+    2) GCC/12.3.0                        7) Tcl/8.6.13-GCCcore-12.3.0
+    3) OpenSSL/1.1                       8) SQLite/3.42.0-GCCcore-12.3.0
+    4) cURL/8.0.1-GCCcore-12.3.0         9) libffi/3.4.4-GCCcore-12.3.0
+    5) libarchive/3.6.2-GCCcore-12.3.0  10) Python/3.11.3-GCCcore-12.3.0
+  
+   
+  
+
+--- environment (OMP_*, KMP_*, GOMP_*, SLURM_*, MPI, UCX, CUDA, QSIM_*)
+  BACKEND=openmp
+  FI_PROVIDER=tcp
+  I_MPI_HYDRA_BOOTSTRAP=slurm
+  I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS=--external-launcher
+  KINDS=qft random
+  OMPI_MCA_hwloc_base_use_hwthreads_as_cpus=1
+  OMPI_MCA_plm_slurm_args=--external-launcher
+  OMP_DYNAMIC=false
+  OMP_PLACES=cores
+  OMP_PROC_BIND=close
+  PMIX_MCA_psec=native
+  QSIM_BIN=build-fusion-36514/qsim
+  QSIM_ROOT=/home/hpcb37/qsim
+  QUBITS=24 28
+  SLURM_CLUSTER_NAME=scitech
+  SLURM_CONF=/etc/slurm/slurm.conf
+  SLURM_CPUS_ON_NODE=64
+  SLURM_CPUS_PER_TASK=64
+  SLURM_GTIDS=0
+  SLURM_JOBID=36514
+  SLURM_JOB_ACCOUNT=hpcclass
+  SLURM_JOB_CPUS_PER_NODE=64
+  SLURM_JOB_END_TIME=1795452534
+  SLURM_JOB_GID=1000000
+  SLURM_JOB_ID=36514
+  SLURM_JOB_NAME=qsim-fusion
+  SLURM_JOB_NODELIST=julia
+  SLURM_JOB_NUM_NODES=1
+  SLURM_JOB_PARTITION=cpu
+  SLURM_JOB_QOS=student
+  SLURM_JOB_START_TIME=1795447134
+  SLURM_JOB_UID=1000224
+  SLURM_LOCALID=0
+  SLURM_MEM_PER_NODE=65536
+  SLURM_NNODES=1
+  SLURM_NODEID=0
+  SLURM_NODELIST=julia
+  SLURM_NPROCS=1
+  SLURM_NTASKS=1
+  SLURM_OOM_KILL_STEP=0
+  SLURM_PRIO_PROCESS=0
+  SLURM_PROCID=0
+  SLURM_SUBMIT_DIR=/home/hpcb37/qsim
+  SLURM_SUBMIT_HOST=rust
+  SLURM_TASKS_PER_NODE=1
+  SLURM_TASK_PID=586800
+  SLURM_TOPOLOGY_ADDR=julia
+  SLURM_TOPOLOGY_ADDR_PATTERN=node
+  SLURM_TRES_PER_TASK=cpu=64
+  UCX_TLS=tcp,sm,self
+
+--- circuits (generator command, sha256)
+configure: cmake -S . -B build-fusion-36514 -DCMAKE_BUILD_TYPE=Release -DQSIM_OPENMP=ON
+build:     cmake --build build-fusion-36514 --parallel 4 --target qsim
+settings:  qubits=(24 28) kinds=(qft random) threads=(1 32) repeats=3 seed=1
+9659007a61e24f57  python3 src/tools/gen_circuits.py qft -n 24 --seed 1 -o data/fusion/qft_24_seed_1.txt
+r0001  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0002  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+r0003  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0004  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+r0005  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0006  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+r0007  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0008  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+r0009  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0010  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+r0011  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion none 
+r0012  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_24_seed_1.txt --no-gate-timing --fusion 1q 
+3bdf485d73c86438  python3 src/tools/gen_circuits.py qft -n 28 --seed 1 -o data/fusion/qft_28_seed_1.txt
+r0013  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0014  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+r0015  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0016  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+r0017  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0018  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+r0019  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0020  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+r0021  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0022  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+r0023  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion none 
+r0024  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/qft_28_seed_1.txt --no-gate-timing --fusion 1q 
+9755ff310899ab39  python3 src/tools/gen_circuits.py random -n 24 --seed 1 --depth 10 -o data/fusion/random_24_seed_1_depth_10.txt
+r0025  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0026  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0027  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0028  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0029  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0030  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0031  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0032  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0033  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0034  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0035  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0036  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_24_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+63fbbd131527a51d  python3 src/tools/gen_circuits.py random -n 28 --seed 1 --depth 10 -o data/fusion/random_28_seed_1_depth_10.txt
+r0037  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0038  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0039  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0040  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0041  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0042  OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0043  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0044  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0045  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0046  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+r0047  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion none 
+r0048  OMP_NUM_THREADS=32 OMP_PROC_BIND=close OMP_PLACES=cores build-fusion-36514/qsim data/fusion/random_28_seed_1_depth_10.txt --no-gate-timing --fusion 1q 
+
+--- end
+end:             2026-11-23T16:38:18+01:00
+elapsed_s:       1159
+runs:            48
+failed_runs:     0
