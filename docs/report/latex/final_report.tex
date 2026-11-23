@@ -1,0 +1,366 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=17mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,graphicx,booktabs,tabularx,float,xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\setlength{\parskip}{3pt}\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.15}
+\title{\vspace{-12mm}A distributed state-vector quantum circuit simulator on SciTech\\[2pt]\large Group 5 $\cdot$ Part 2 $\cdot$ Final technical report and EuroHPC scale-up plan}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-12mm}
+
+
+\textbf{Group 5:} Ana-Maria Pintilie, Edard Hala, Emma Jiayi Liu, Hurshneet Singh Chadha, Marija Velkoska $\cdot$ \textbf{Repository:} github.com/velkosska/Distributed-State-Vector-Quantum-Circuit-Simulator, branch \texttt{fusion-and-report} $\cdot$ \textbf{Code version of every result:} commit \texttt{fabbd99} (CUDA: \texttt{ead5cef}), clean tree, recorded in each job's \texttt{meta.txt} $\cdot$ \textbf{Reproduce:} \texttt{REPRODUCE.md}.
+
+
+
+\section{Problem and motivation}
+
+
+
+A quantum circuit on \emph{n} qubits acts on $2^{n}$ complex amplitudes. A state-vector simulator stores all of them (16 B each, double precision) and applies every gate as an update of the whole vector: a one-qubit gate mixes the $2^{n-1}$ pairs of amplitudes whose indices differ only in the target bit. The method is exact and is how quantum algorithms are checked before they reach hardware, but its cost is exponential: 28 qubits need 4 GiB, 32 qubits 64 GiB, 40 qubits 16 TiB, and every extra qubit doubles both memory and time per gate.
+
+
+
+Each gate does only 0.19--0.44 flop per byte it moves (Table 1), so we expected the simulator to be limited by memory bandwidth on one device and by network bandwidth once the state is split. Our question: \textbf{how far do OpenMP, MPI and CUDA get on this problem on SciTech, what limits each, and which optimisations remove passes over memory or exchanges over the network?} Success metrics: correctness against Qiskit to $10^{-10}$, time per gate, speedup and efficiency, achieved bandwidth.
+
+
+
+\section{Application architecture}
+
+
+
+One C++17 library with one binary per backend, built with CMake (\texttt{QSIM\_OPENMP}, \texttt{QSIM\_MPI}, \texttt{QSIM\_CUDA}):
+
+
+
+\begin{verbatim}
+circuit file -> read_circuit() -> fuse() -> backend -> SUMMARY line + per-gate timing CSV
+gen_circuits.py (QFT, Grover,      opt. 1     +- qsim       serial / OpenMP
+random; seeded)                               +- qsim_mpi   2^p ranks, qubit remapping (opt. 2)
+                                              +- qsim_cuda  one kernel launch per gate
+\end{verbatim}
+
+
+
+Every kernel is a loop over a pair index \emph{k} with no dependencies between iterations, so the same code is the OpenMP loop (static schedule, cache-line-aligned tiles, matching first touch), the CUDA kernel (thread id = \emph{k}) and the per-rank kernel of the MPI backend. With P = $2^{p}$ ranks the top \emph{p} qubits are \emph{global}: diagonal gates and controlled gates with a global control need no communication; a dense gate on a global qubit exchanges the rank's slice with a partner in 64 MiB \texttt{MPI\_Sendrecv} chunks. Qubit remapping swaps a global qubit with the local qubit used furthest in the future (Belady), so a run of gates on a global qubit costs one half-slice exchange. Benchmarks are QFT (structured, many controlled phases), Grover with one iteration (long Toffoli chains) and random depth-10 circuits, all with seed 1.
+
+
+
+\section{HPC implementation and technology matrix}
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllX@{}}
+\toprule
+\textbf{Technology} & \textbf{Tested} & \textbf{In final application} & \textbf{Main observation} \\
+\midrule
+Slurm (sbatch, srun, sacct, squeue) & Yes & Yes & every compute run; one harness writes \texttt{meta.txt} + \texttt{runs.csv} per job \\
+OpenMP & Yes & Yes & 6.1$\times$ on 32 threads at 28 q; flattens with memory bandwidth \\
+MPI (OpenMPI 4.1.5) & Yes & Yes & 4.8$\times$ on 16 ranks inside one node; slower once ranks span two nodes \\
+MPI + OpenMP hybrid & Yes & Yes & 2 threads per rank in all MPI runs \\
+CUDA 12.8 (extra technology) & Yes & Separate backend & 5.6--6.7$\times$ over 32 CPU cores from 26 q; capped at 32 q by 96 GB \\
+Gate fusion (optimisation) & Yes & Yes (\texttt{--fusion 1q}) & 2.1--2.4$\times$ on random circuits, none on QFT \\
+Qubit remapping (optimisation) & Yes & Yes (default on) & 1.7--9$\times$ less data per rank on test circuits; 1.32$\times$ faster in a cluster A/B run \\
+LIKWID / perf / Nsight Compute & Tried & No & not installed or no counter access (\texttt{perf\_event\_paranoid=4}, \texttt{ERR\_NVGPUCTRPERM}) \\
+Score-P 8.4 & Tried & No & instrumented build failed to link (OpenMP adapter); Appendix A \\
+Qiskit (validation library) & Yes & Yes & reference state vectors, 2--20 qubits \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\section{Experimental methodology}
+
+
+
+\textbf{Platform.} SciTech, partition \texttt{cpu}: nodes with 2 $\times$ AMD EPYC 9745/9755 (Zen 5, 2 $\times$ 128 cores), 503 GiB, 2 NUMA domains, 2 $\times$ 10 GbE bonded (20 Gb/s, no InfiniBand). GPU partition: NVIDIA RTX PRO 6000 Blackwell, 96 GB. GCC 12.3.0, OpenMPI 4.1.5, CMake 3.26.3, Python 3.11.3, \texttt{-O3 -march=native} (\texttt{env/modules.sh}, pinned Python packages in \texttt{env/requirements.lock}). The course QOS caps a user at \textbf{64 CPUs (32 physical cores)} and forbids \texttt{--exclusive}, so all CPU numbers describe one eighth of a node shared with other users' jobs.
+
+
+
+\textbf{Runs.} Every run is a Slurm job through \texttt{slurm/lib/run\_harness.sh}, which records the commit and dirty flag, binary SHA-256, modules, nodes, CPU model, \texttt{OMP\_*}/\texttt{SLURM\_*} variables, circuit generator command and hash, and the exact command line. The timer covers the gate loop only. Each configuration runs \textbf{3 times in the same job}; we report the median and the min--max range, except where stated. OpenMP runs use \texttt{OMP\_PLACES=cores} with close and spread binding; MPI uses \texttt{srun --cpu-bind=cores --exact}. Weak scaling compares time per gate because gate counts grow with \emph{n}. Speedup S = T(p$_0$)/T(p), efficiency E = S/p.
+
+
+
+\textbf{Table 1. Traffic model (per amplitude of the state) used for bandwidth and arithmetic intensity.}
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XlllX@{}}
+\toprule
+\textbf{Kernel} & \textbf{Gates} & \textbf{flop} & \textbf{bytes} & \textbf{flop/B} \\
+\midrule
+dense 2$\times$2 & H X Y RX RY U & 14 & 32 & 0.44 \\
+diagonal & Z S T P RZ & 3--6 & 16--32 & 0.19 \\
+controlled 2$\times$2 & CX CY & 7 & 16 & 0.44 \\
+controlled phase & CZ CP & 1.5 & 8 & 0.19 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\section{Results}
+
+
+
+\textbf{Correctness.} Serial, OpenMP (4 threads) and MPI (4 ranks) builds match Qiskit on all 168 cases (QFT, Grover, random; 2--20 qubits), largest error 4.4 $\times$ $10^{-14}$ (jobs 36497--36499). The CUDA backend passes the same 57-circuit check on the RTX PRO 6000 (job 32980 on commit \texttt{5a53b81}, 57/57, \texttt{results/validation/32980/}).
+
+
+
+\textbf{Serial baseline (job 36504, 45/45 runs).} Time per gate grows 4$\times$ per two qubits from 20 to 28 qubits (QFT: 0.52 ms $\rightarrow$ 205 ms), exactly with the state size (Figure 1). At 28 qubits a dense gate streams 8 GiB in 0.2 s, $\approx$ 40 GB/s, which equals the one-core STREAM triad measured on the same node (41 GB/s, job 36503).
+
+
+
+\begin{figure}[ht]\centering
+\includegraphics[width=0.60\linewidth]{figures/time_per_gate_vs_qubits.png}
+\caption{Serial time per gate vs qubits (median of 3).}
+\end{figure}
+
+
+
+\textbf{OpenMP (jobs 36512, 36513).} Strong scaling at 28 qubits (Figure 2): QFT reaches \textbf{6.1$\times$} on 32 threads (85 s $\rightarrow$ 14 s), random 4.6--5.0$\times$. Spread binding beats close at 4--16 threads (3.0$\times$ vs 2.5$\times$ at 4) because it uses the memory channels of more core complexes; both meet at 32. An Amdahl fit gives f = 0.14 (QFT) and 0.18 (random), and the Karp--Flatt metric stays at 0.11--0.19 for all thread counts. The gate loop has no serial section, so this "serial fraction" is the share of time limited by shared memory bandwidth, visible already at 2 threads (1.7$\times$). Weak scaling (24 q on 1 thread to 29 q on 32) keeps 89 \% at 2 threads and 72 \% at 4, then falls to \textbf{20 \%} at 32: the threads share one memory system.
+
+
+
+\begin{figure}[ht]\centering
+\includegraphics[width=0.78\linewidth]{figures/strong_openmp_strong.png}
+\caption{OpenMP strong scaling, 28 qubits, speedup and efficiency.}
+\end{figure}
+
+
+
+\textbf{MPI strong scaling (jobs 36515, 36586, 36593).} 30 qubits (16 GiB), 2 threads per rank; 1--16 ranks fit in one node, 32 ranks span two. QFT reaches \textbf{4.8$\times$} on 16 ranks (275 s $\rightarrow$ 57 s, best of 3) and drops to 3.8$\times$ at 32. Random circuits reach only 2.0$\times$ (8 ranks) and become \textbf{4$\times$ slower than one rank} at 32 ranks (1,397 s) (Figure 3). Repeats on the shared nodes varied up to 4$\times$, so we show the best of three with the full range shaded; medians tell the same story with more noise (\texttt{results/summary/scaling\_strong.csv}).
+
+
+
+\begin{figure}[ht]\centering
+\includegraphics[width=0.60\linewidth]{figures/c_mpi_strong.png}
+\caption{MPI strong scaling, 30 qubits, best of 3 (shaded: repeat range).}
+\end{figure}
+
+
+
+\textbf{MPI weak scaling (jobs 36584, 36745, run by our teammates).} 4 GiB per rank, 28 qubits on 1 rank to 32 on 16, all on one node: QFT efficiency 92 \% (2 ranks), 70 \% (4), 37 \% (8), \textbf{16 \%} (16); random 68 \% at 2 ranks and about 25 \% at 8--16. The ranks share one node's memory bandwidth, and more ranks mean more global qubits and more exchanges.
+
+
+
+\textbf{Sensitivity (job 36597, teammate run).} 30-qubit random circuits with 0--100 \% of gate slots on the 4 global qubits, 16 ranks on two nodes, remapping off. Time grows \textbf{linearly with the number of exchanging gates}: 36 s with none, 231 s when all 150 dense gates exchange (Figure 4). The least-squares fit over all circuits gives 0.14 s per local gate and \textbf{1.41 s per exchanging gate}, a ratio of 10. Each exchange moves 1 GiB per rank.
+
+
+
+\begin{figure}[ht]\centering
+\includegraphics[width=0.58\linewidth]{figures/c_sensitivity.png}
+\caption{Communication sensitivity: time vs number of exchanging gates (median, bars: range).}
+\end{figure}
+
+
+
+\textbf{CUDA (job 33869).} On one RTX PRO 6000 the GPU sustains 1,400--1,460 GB/s from 26 qubits and is \textbf{5.6--6.7$\times$ faster} than our 32-core OpenMP build, matching the bandwidth ratio (210--260 GB/s on the CPU side). It reaches 32 qubits (64 GiB); copies to and from the device take 9--34 \% of GPU time for these short circuits.
+
+
+
+\section{Bottleneck analysis}
+
+
+
+\textbf{On a node: memory bandwidth.} Evidence: (1) every kernel has 0.19--0.44 flop/B, far left of the ridge point of any modern CPU; (2) serial time per gate scales exactly with bytes moved, and the achieved 40 GB/s equals one-core STREAM; (3) per-gate instrumentation (\texttt{results/summary/gate\_bandwidth.csv}) shows all gate types at 105--116 GB/s on 32 threads, independent of their flop count, i.e. limited by bytes, not flops; (4) OpenMP strong and weak scaling flatten exactly where bandwidth saturates, and the GPU's advantage equals its bandwidth advantage. Our STREAM job used close binding and reached only 82 GB/s on 32 threads, below what the spread-bound gate kernels achieve, so we use it as the single-core roof only.
+
+
+
+\textbf{Across nodes: the network.} We profiled the MPI runs with the backend's per-gate \texttt{MPI\_Wtime} timers, which record time and bytes sent per gate (\texttt{analysis/comm\_breakdown.py} $\rightarrow$ \texttt{results/summary/mpi\_comm\_breakdown.csv}):
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllllX@{}}
+\toprule
+\textbf{30 q, best repeat} & \textbf{Ranks / nodes} & \textbf{Gate time} & \textbf{Exchanging gates} & \textbf{Share of time in exchanges} & \textbf{Effective GB/s per rank} \\
+\midrule
+Random & 16 / 1 & 174 s & 24 & 27 \% & 0.27 \\
+Random & 32 / 2 & 830 s & 29 & \textbf{95 \%} & \textbf{0.01} \\
+QFT & 16 / 1 & 51 s & 8 & 57 \% & 0.15 \\
+QFT & 32 / 2 & 57 s & 10 & 62 \% & 0.07 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+Once ranks span two nodes, 29 exchanging gates take 95 \% of the time and each rank sees about 10 MB/s, while the nodes have 20 Gb/s Ethernet shared by 16 ranks each. The sensitivity fit confirms it independently: one exchanging gate costs ten local gates. The SciTech interconnect (TCP over Ethernet, shared) is the bottleneck for anything that leaves a node, and the circuit's share of dense gates on global qubits decides how much it matters.
+
+
+
+\section{Optimisation}
+
+
+
+\textbf{Gate fusion (job 36514).} \texttt{fuse()} merges runs of single-qubit gates on a qubit into one 2$\times$2 matrix, carries diagonal runs past controls, turns SWAPs into relabellings and drops identities; all backends use the fused gate list unchanged, and fused states match Qiskit to $10^{-10}$. Before/after, median of 3:
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllllX@{}}
+\toprule
+\textbf{Circuit} & \textbf{Gates} & \textbf{1 thread: before $\rightarrow$ after} & \textbf{Speedup} & \textbf{32 threads: before $\rightarrow$ after} & \textbf{Speedup} \\
+\midrule
+Random, 24 q & 298 $\rightarrow$ 143 & 5.15 s $\rightarrow$ 2.49 s & 2.07$\times$ & 0.82 s $\rightarrow$ 0.39 s & 2.13$\times$ \\
+Random, 28 q & 349 $\rightarrow$ 158 & 95.0 s $\rightarrow$ 41.3 s & \textbf{2.30$\times$} & 20.5 s $\rightarrow$ 8.5 s & \textbf{2.41$\times$} \\
+QFT, 28 q & 448 $\rightarrow$ 447 & 83.1 s $\rightarrow$ 84.0 s & 0.99$\times$ & 14.0 s $\rightarrow$ 13.7 s & 1.02$\times$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+The speedup follows the removed passes over memory and holds at 1 and 32 threads, which confirms the bandwidth diagnosis. QFT gains nothing: it is almost all two-qubit controlled phases; two-qubit fusion would be the next step.
+
+
+
+\textbf{Qubit remapping (MPI).} Remapping is on in all our MPI runs. Counted statically on 18-qubit test circuits with 4 ranks, it cuts the data sent per rank by 1.7--9$\times$ (e.g. random, 50 \% global gates: 48 exchanges / 35 MiB $\rightarrow$ 5 swaps / 4 MiB). On the cluster, a controlled A/B run (remapping off and on back to back on the same two nodes, 28-qubit QFT, 16 ranks) took \textbf{257 s off and 195 s on (1.32$\times$ faster)}, sending 2.5 vs 2.0 GiB per rank (job 36832, Appendix A).
+
+
+
+\section{Technology exploration}
+
+
+
+CUDA was our additional technology. The port was a 1:1 mapping of the pair-index loop to one GPU thread per pair ($\approx$ 220 lines); most effort went into the platform (CUDA as an Apptainer container without CMake, architecture detection for sm\_120). It is the fastest backend by the bandwidth ratio, but a hard 32-qubit ceiling makes MPI the only route to larger states. We also tried hardware-counter profiling: LIKWID and perf are not available and PAPI/perf counters are blocked (\texttt{perf\_event\_paranoid = 4}), Nsight Compute needs counter permissions we do not have. We also tried Score-P 8.4 for an MPI profile; its instrumented build failed to link against the OpenMP runtime (Appendix A). These negative results are why our bottleneck analysis rests on our own per-gate timers and STREAM.
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllX@{}}
+\toprule
+\textbf{} & \textbf{OpenMP (32 cores)} & \textbf{MPI (2 nodes)} & \textbf{CUDA (1 GPU)} \\
+\midrule
+Effort & lowest: one pragma per loop, pinning, first touch & highest: distribution, exchanges, remapping ($\approx$ 470 lines) & low for kernels, moderate for tooling \\
+Best measured & 6.1$\times$, 105--116 GB/s per gate & 4.8$\times$ inside a node; network-bound across & 1,400--1,460 GB/s, 6.7$\times$ over 32 cores \\
+Limit & one node's memory bandwidth & 20 Gb/s Ethernet, 10 MB/s per rank in practice & 96 GB: 32 qubits \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\section{Conclusions}
+
+
+
+Bandwidth decides everything. On a node the simulator runs at the memory speed it is given (40 GB/s per core), so OpenMP buys 6.1$\times$ on 32 cores and the GPU buys another 6.7$\times$ because its memory is faster. MPI works well while ranks stay inside a node (4.8$\times$ on 16 ranks), but on SciTech's Ethernet an exchange costs as much as ten local gates and a run that spans two nodes can spend 95 \% of its time communicating; the share of dense gates on global qubits, not the size, decides the cost. Gate fusion halves random circuits at no cost in accuracy; we measured it on the CPU, and because it only rewrites the gate list, every backend gets it. What did not work: hardware-counter profiling (no access), and multi-node strong scaling on this network. Next steps: overlap exchanges with computation (non-blocking \texttt{MPI\_Isend/Irecv} per chunk), swap several global qubits per all-to-all, two-qubit fusion, and a run on a system with a real HPC interconnect, which is the scale-up plan below.
+
+
+
+\section{Reproducibility and known limitations}
+
+
+
+All commands are in \texttt{REPRODUCE.md}; module versions, compiler flags, seeds, Slurm requests and exact command lines are in each \texttt{results/<experiment>/<jobid>/meta.txt}, and selected job logs in \texttt{results/logs/}. Limitations: shared nodes (repeat ranges up to 4$\times$ for MPI; 25 configurations exceed a 10 \% range and are flagged in \texttt{runs\_summary.csv}); one eighth of a node per user; the MPI QFT job was preempted before 32 ranks and that point is a separate rerun on the same commit; the CUDA run predates later CPU kernel changes (GPU code unchanged, CPU side may be slightly slow); scaling sweeps omit Grover and stop at 32 qubits to fit the shared queue; on the night before the deadline the network was congested and failing, so the remapping A/B test has one complete pair.
+
+
+
+\section{Appendix A. Qubit remapping on the cluster and profiling attempts}
+
+
+
+**Remapping A/B (job 36832, \texttt{slurm/remap\_ab.sbatch}, commit \texttt{fabbd99}).** To keep network conditions equal, one job ran remapping off and on back to back on the same allocation (2 nodes $\times$ 8 ranks $\times$ 4 threads, 28-qubit QFT). The first pair completed; the second failed when an MPI connection between the nodes timed out (\texttt{connect() ... failed}, log in \texttt{results/logs/job-36832-qsim-remap-ab.log}), so this is one pair, not three.
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XXX@{}}
+\toprule
+\textbf{28-qubit QFT, 16 ranks on 2 nodes} & \textbf{Time} & \textbf{Data sent per rank} \\
+\midrule
+Remapping off & 256.8 s & 2.5 GiB \\
+Remapping on & 195.1 s & 2.0 GiB \\
+Effect & \textbf{1.32$\times$ faster} & 20 \% less \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+A separate remapping-on sensitivity run (job 36764, same configuration as job 36597) took 775--786 s for the 30-qubit QFT against 52--81 s with remapping off in the teammate's run earlier that day. The two runs were hours apart on a shared, congested network, so we do not use that difference as evidence; it is committed for completeness (\texttt{results/sensitivity/36764}, timed out after 5 runs).
+
+
+
+\textbf{Profiling tools tried.} \texttt{perf} is not installed and \texttt{perf\_event\_paranoid = 4} blocks PAPI and other counter-based tools; LIKWID is not available; Nsight Compute reports \texttt{ERR\_NVGPUCTRPERM}. Score-P 8.4 (\texttt{Score-P/8.4-gompi-2023b}) instrumented our MPI build, but linking failed in its OpenMP adapter (\texttt{undefined reference to POMP2\_Init\_regions}; \texttt{--thread=omp:ompt} is not supported by that installation). The job script and the link error are in \texttt{results/profile\_attempts/}. Our bottleneck evidence therefore comes from the backend's per-gate \texttt{MPI\_Wtime} timers (\texttt{results/summary/mpi\_comm\_breakdown.csv}), the per-gate bandwidth model and STREAM.
+
+
+
+
+
+\newpage
+
+
+
+\section*{EuroHPC scale-up plan}
+
+
+
+\textbf{Goal.} Simulate 36--40 qubits (1--16 TiB), which no single SciTech node or GPU can hold, and measure weak scaling, strong scaling and communication cost on a real HPC interconnect. Our SciTech results show the code is bandwidth-bound on a node and network-bound across nodes; a larger system helps on both: more aggregate memory and memory bandwidth, and an interconnect 5--10$\times$ faster than 20 Gb/s Ethernet.
+
+
+
+\textbf{Target system and access.} MareNostrum 5 GPP (BSC): 2 $\times$ Intel Xeon Platinum 8480+ (112 cores), 256 GiB DDR5 per node, InfiniBand NDR200 (we plan with 100 Gb/s $\approx$ 12.5 GB/s per node, the conservative reading of the shared-port configuration). Same x86 instruction set and Slurm/EasyBuild environment, so the harness and \texttt{env/modules.sh} carry over by changing module names. Alternative: LUMI-C (2 $\times$ EPYC 7763, 256 GiB, Slingshot-11). Access mode: \textbf{EuroHPC Benchmark Access} (scalability tests feeding a later Regular Access proposal).
+
+
+
+\textbf{Memory.} State = 16 B $\times$ $2^{n}$; the MPI backend needs the slice plus an exchange buffer (64 MiB chunks, buffer factor 0.25). With $\approx$ 224 GiB usable per node, 32 qubits per node (64 GiB + 16 GiB buffer) leaves room for the OS and MPI:
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllX@{}}
+\toprule
+\textbf{Qubits} & \textbf{State} & \textbf{Nodes (32 q per node)} & \textbf{Per node} \\
+\midrule
+32 & 64 GiB & 1 & 80 GiB \\
+36 & 1 TiB & 16 & 80 GiB \\
+38 & 4 TiB & 64 & 80 GiB \\
+40 & 16 TiB & 256 & 80 GiB \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\textbf{Time per run, from our measurements.} A local gate streams the 64 GiB slice twice (read + write); at an assumed 400 GB/s STREAM per MN5 node that is $\approx$ 0.34 s (on SciTech we measured 105--116 GB/s on 32 cores). An exchanging gate also moves the slice over the network: 64 GiB / 12.5 GB/s $\approx$ 5.5 s, i.e. \textbf{$\approx$ 16 local gates}. On SciTech we measured a ratio of 10 (1.41 s vs 0.14 s, job 36597), so the model is in the same range and probably pessimistic. Our random circuits have 8.5 \% exchanging gates at 30 qubits on 16 ranks without remapping (\texttt{analyze\_circuit.py}, job 36597), fewer with it; at 40 qubits ($\approx$ 500 gates, 9 \% exchanging): 455 $\times$ 0.34 s + 45 $\times$ 5.5 s $\approx$ 400 s $\approx$ \textbf{7 min on 256 nodes $\approx$ 30 node-hours per run}.
+
+
+
+\textbf{Campaign and request.}
+
+
+
+\begin{table}[ht]\centering\small
+\begin{tabularx}{\linewidth}{@{}XllX@{}}
+\toprule
+\textbf{Phase} & \textbf{Runs} & \textbf{Configuration} & \textbf{Node-hours} \\
+\midrule
+Port, validation, STREAM and MPI ping-pong between 2 nodes & \textasciitilde{}10 & 1--2 nodes & 10 \\
+Weak scaling, QFT and random & 2 $\times$ 9 sizes $\times$ 3 & 32 q / 1 node $\rightarrow$ 40 q / 256 nodes ($\Sigma$ 511 node-sizes $\times$ $\approx$ 0.1 h) & 310 \\
+Strong scaling at 36 q & 2 $\times$ 5 $\times$ 3 & 16, 32, 64, 128, 256 nodes & 100 \\
+Sensitivity at 36 q, remapping off and on & 4 $\times$ 2 $\times$ 3 & 16 nodes & 40 \\
+Subtotal &  &  & 460 \\
+$\times$ 1.5 for queue tests, failed runs and reruns of noisy points &  &  & \textbf{$\approx$ 700} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+\textbf{Request: 800 node-hours} ($\approx$ 90,000 core-hours) over three months. Week 1: port, validate against Qiskit, measure STREAM and inter-node bandwidth, and replace the model numbers above with measured ones. Weeks 2--4: weak scaling to 64 nodes with a go/no-go at \textbf{$\ge$ 50 \% weak efficiency} at 64 nodes (on SciTech we saw 16 \% inside one shared node, so this is the key risk). Weeks 5--8: 256-node runs and strong scaling. Weeks 9--12: sensitivity and reserve.
+
+
+
+\textbf{Software.} GCC 12+ or the system compiler, OpenMPI or the vendor MPI with UCX/InfiniBand, CMake $\ge$ 3.20, Python 3.11 with numpy/qiskit for validation; no licensed software. \textbf{Expected scaling challenges:} exchanges are blocking and one global qubit at a time (overlap and multi-qubit all-to-all swaps are the planned fixes); each extra qubit doubles the node count, so weak scaling is in powers of two only; network contention at 256 nodes is not captured by the model. \textbf{Support needed:} help choosing MPI/UCX transport settings, and access to Score-P/Scalasca or vendor tools with counter permissions on the compute nodes, which we lacked on SciTech.
+\end{document}

@@ -34,9 +34,9 @@ Every kernel is a loop over a pair index *k* with no dependencies between iterat
 | MPI + OpenMP hybrid | Yes | Yes | 2 threads per rank in all MPI runs |
 | CUDA 12.8 (extra technology) | Yes | Separate backend | 5.6–6.7× over 32 CPU cores from 26 q; capped at 32 q by 96 GB |
 | Gate fusion (optimisation) | Yes | Yes (`--fusion 1q`) | 2.1–2.4× on random circuits, none on QFT |
-| Qubit remapping (optimisation) | Yes | Yes (default on) | 1.7–9× less data per rank on test circuits |
+| Qubit remapping (optimisation) | Yes | Yes (default on) | 1.7–9× less data per rank on test circuits; 1.32× faster in a cluster A/B run |
 | LIKWID / perf / Nsight Compute | Tried | No | not installed or no counter access (`perf_event_paranoid=4`, `ERR_NVGPUCTRPERM`) |
-| Score-P 8.4 | Yes | No | MPI profile of the 30-qubit runs (Appendix A) |
+| Score-P 8.4 | Tried | No | instrumented build failed to link (OpenMP adapter); Appendix A |
 | Qiskit (validation library) | Yes | Yes | reference state vectors, 2–20 qubits |
 
 ## 4. Experimental methodology
@@ -91,7 +91,7 @@ Every kernel is a loop over a pair index *k* with no dependencies between iterat
 | QFT | 16 / 1 | 51 s | 8 | 57 % | 0.15 |
 | QFT | 32 / 2 | 57 s | 10 | 62 % | 0.07 |
 
-Once ranks span two nodes, 29 exchanging gates take 95 % of the time and each rank sees about 10 MB/s, while the nodes have 20 Gb/s Ethernet shared by 16 ranks each. The sensitivity fit confirms it independently: one exchanging gate costs ten local gates. The SciTech interconnect (TCP over Ethernet, shared) is the bottleneck for anything that leaves a node, and the circuit's share of dense gates on global qubits decides how much it matters. A Score-P profile of the same runs is in Appendix A.
+Once ranks span two nodes, 29 exchanging gates take 95 % of the time and each rank sees about 10 MB/s, while the nodes have 20 Gb/s Ethernet shared by 16 ranks each. The sensitivity fit confirms it independently: one exchanging gate costs ten local gates. The SciTech interconnect (TCP over Ethernet, shared) is the bottleneck for anything that leaves a node, and the circuit's share of dense gates on global qubits decides how much it matters.
 
 ## 7. Optimisation
 
@@ -105,11 +105,11 @@ Once ranks span two nodes, 29 exchanging gates take 95 % of the time and each ra
 
 The speedup follows the removed passes over memory and holds at 1 and 32 threads, which confirms the bandwidth diagnosis. QFT gains nothing: it is almost all two-qubit controlled phases; two-qubit fusion would be the next step.
 
-**Qubit remapping (MPI).** Remapping is on in all our MPI runs. Counted statically on 18-qubit test circuits with 4 ranks, it cuts the data sent per rank by 1.7–9× (e.g. random, 50 % global gates: 48 exchanges / 35 MiB → 5 swaps / 4 MiB). The sensitivity runs above were repeated with remapping on (job 36764); see Appendix A.
+**Qubit remapping (MPI).** Remapping is on in all our MPI runs. Counted statically on 18-qubit test circuits with 4 ranks, it cuts the data sent per rank by 1.7–9× (e.g. random, 50 % global gates: 48 exchanges / 35 MiB → 5 swaps / 4 MiB). On the cluster, a controlled A/B run (remapping off and on back to back on the same two nodes, 28-qubit QFT, 16 ranks) took **257 s off and 195 s on (1.32× faster)**, sending 2.5 vs 2.0 GiB per rank (job 36832, Appendix A).
 
 ## 8. Technology exploration
 
-CUDA was our additional technology. The port was a 1:1 mapping of the pair-index loop to one GPU thread per pair (≈ 220 lines); most effort went into the platform (CUDA as an Apptainer container without CMake, architecture detection for sm_120). It is the fastest backend by the bandwidth ratio, but a hard 32-qubit ceiling makes MPI the only route to larger states. We also tried hardware-counter profiling: LIKWID and perf are not available and PAPI/perf counters are blocked (`perf_event_paranoid = 4`), Nsight Compute needs counter permissions we do not have. These negative results are why our bottleneck analysis rests on instrumentation, STREAM and Score-P.
+CUDA was our additional technology. The port was a 1:1 mapping of the pair-index loop to one GPU thread per pair (≈ 220 lines); most effort went into the platform (CUDA as an Apptainer container without CMake, architecture detection for sm_120). It is the fastest backend by the bandwidth ratio, but a hard 32-qubit ceiling makes MPI the only route to larger states. We also tried hardware-counter profiling: LIKWID and perf are not available and PAPI/perf counters are blocked (`perf_event_paranoid = 4`), Nsight Compute needs counter permissions we do not have. We also tried Score-P 8.4 for an MPI profile; its instrumented build failed to link against the OpenMP runtime (Appendix A). These negative results are why our bottleneck analysis rests on our own per-gate timers and STREAM.
 
 | | OpenMP (32 cores) | MPI (2 nodes) | CUDA (1 GPU) |
 |---|---|---|---|
@@ -123,7 +123,22 @@ Bandwidth decides everything. On a node the simulator runs at the memory speed i
 
 ## 10. Reproducibility and known limitations
 
-All commands are in `REPRODUCE.md`; module versions, compiler flags, seeds, Slurm requests and exact command lines are in each `results/<experiment>/<jobid>/meta.txt`, and selected job logs in `results/logs/`. Limitations: shared nodes (repeat ranges up to 4× for MPI; 25 configurations exceed a 10 % range and are flagged in `runs_summary.csv`); one eighth of a node per user; the MPI QFT job was preempted before 32 ranks and that point is a separate rerun on the same commit; the CUDA run predates later CPU kernel changes (GPU code unchanged, CPU side may be slightly slow); scaling sweeps omit Grover and stop at 32 qubits to fit the shared queue.
+All commands are in `REPRODUCE.md`; module versions, compiler flags, seeds, Slurm requests and exact command lines are in each `results/<experiment>/<jobid>/meta.txt`, and selected job logs in `results/logs/`. Limitations: shared nodes (repeat ranges up to 4× for MPI; 25 configurations exceed a 10 % range and are flagged in `runs_summary.csv`); one eighth of a node per user; the MPI QFT job was preempted before 32 ranks and that point is a separate rerun on the same commit; the CUDA run predates later CPU kernel changes (GPU code unchanged, CPU side may be slightly slow); scaling sweeps omit Grover and stop at 32 qubits to fit the shared queue; on the night before the deadline the network was congested and failing, so the remapping A/B test has one complete pair.
+
+## Appendix A. Qubit remapping on the cluster and profiling attempts
+
+**Remapping A/B (job 36832, `slurm/remap_ab.sbatch`, commit `fabbd99`).** To keep network conditions equal, one job ran remapping off and on back to back on the same allocation (2 nodes × 8 ranks × 4 threads, 28-qubit QFT). The first pair completed; the second failed when an MPI connection between the nodes timed out (`connect() ... failed`, log in `results/logs/job-36832-qsim-remap-ab.log`), so this is one pair, not three.
+
+| 28-qubit QFT, 16 ranks on 2 nodes | Time | Data sent per rank |
+|---|---:|---:|
+| Remapping off | 256.8 s | 2.5 GiB |
+| Remapping on | 195.1 s | 2.0 GiB |
+| Effect | **1.32× faster** | 20 % less |
+
+A separate remapping-on sensitivity run (job 36764, same configuration as job 36597) took 775–786 s for the 30-qubit QFT against 52–81 s with remapping off in the teammate's run earlier that day. The two runs were hours apart on a shared, congested network, so we do not use that difference as evidence; it is committed for completeness (`results/sensitivity/36764`, timed out after 5 runs).
+
+**Profiling tools tried.** `perf` is not installed and `perf_event_paranoid = 4` blocks PAPI and other counter-based tools; LIKWID is not available; Nsight Compute reports `ERR_NVGPUCTRPERM`. Score-P 8.4 (`Score-P/8.4-gompi-2023b`) instrumented our MPI build, but linking failed in its OpenMP adapter (`undefined reference to POMP2_Init_regions`; `--thread=omp:ompt` is not supported by that installation). The job script and the link error are in `results/profile_attempts/`. Our bottleneck evidence therefore comes from the backend's per-gate `MPI_Wtime` timers (`results/summary/mpi_comm_breakdown.csv`), the per-gate bandwidth model and STREAM.
+
 
 \newpage
 

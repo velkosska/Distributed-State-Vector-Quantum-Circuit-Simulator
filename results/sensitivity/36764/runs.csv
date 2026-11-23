@@ -1,0 +1,5 @@
+run_id,experiment,job_id,backend,kind,qubits,nodes,ranks,threads,gpus,repeat,seed,depth,iterations,global_fraction,global_qubits,gates_in,gates_run,fusion,total_s,mean_gate_s,norm_err,status,tag,circuit,timing_csv
+r0001,sensitivity,36764,mpi,qft,30,2,16,4,0,1,1,,,,4,510,510,none,768.119907,1.50611746,1.34126044e-12,ok,kind,data/sensitivity/qft_30_seed_1.txt,raw/r0001_qft_30q_p16_t4_rep1.gates.csv
+r0002,sensitivity,36764,mpi,qft,30,2,16,4,0,2,1,,,,4,510,510,none,785.972325,1.5411222,1.34126044e-12,ok,kind,data/sensitivity/qft_30_seed_1.txt,raw/r0002_qft_30q_p16_t4_rep2.gates.csv
+r0003,sensitivity,36764,mpi,qft,30,2,16,4,0,3,1,,,,4,510,510,none,775.102497,1.51980882,1.34126044e-12,ok,kind,data/sensitivity/qft_30_seed_1.txt,raw/r0003_qft_30q_p16_t4_rep3.gates.csv
+r0004,sensitivity,36764,mpi,random,30,2,16,4,0,1,1,10,,,4,376,376,none,1754.10072,4.66516148,2.57571742e-13,ok,kind,data/sensitivity/random_30_seed_1_depth_10.txt,raw/r0004_random_30q_p16_t4_rep1.gates.csv

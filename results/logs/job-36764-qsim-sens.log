@@ -1,0 +1,6 @@
+[harness 22:28:57] experiment=sensitivity job=36764 out=results/sensitivity/36764
+[harness 22:41:51] r0001 qft n=30 P=16 T=4 rep=1 total_s=768.119907 wall=773.87s ok
+[harness 22:55:03] r0002 qft n=30 P=16 T=4 rep=2 total_s=785.972325 wall=791.56s ok
+[harness 23:08:03] r0003 qft n=30 P=16 T=4 rep=3 total_s=775.102497 wall=779.58s ok
+[harness 23:37:22] r0004 random n=30 P=16 T=4 rep=1 total_s=1754.10072 wall=1758.78s ok
+slurmstepd-fortran: error: *** JOB 36764 ON fortran CANCELLED AT 2026-11-23T23:59:21 DUE TO TIME LIMIT ***

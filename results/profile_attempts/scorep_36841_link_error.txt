@@ -1,0 +1,3 @@
+[100%] Linking CXX executable qsim_mpi
+/cvmfs/software.eessi.io/versions/2023.06/compat/linux/x86_64/usr/bin/ld: /cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen4/software/Score-P/8.4-gompi-2023b/lib/libscorep_adapter_opari2_openmp_mgmt.so: undefined reference to `POMP2_Init_regions'
+/cvmfs/software.eessi.io/versions/2023.06/compat/linux/x86_64/usr/bin/ld: /cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen4/software/Score-P/8.4-gompi-2023b/lib/libscorep_adapter_opari2_openmp_mgmt.so: undefined reference to `POMP2_Get_num_regions'
