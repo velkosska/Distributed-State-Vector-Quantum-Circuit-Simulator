@@ -14,6 +14,7 @@ option(QSIM_OPENMP  "Enable OpenMP (gate loops, state initialisation)" OFF)
 option(QSIM_TESTS   "Build unit tests" ON)
 option(QSIM_CUDA    "Build the single-GPU backend (qsim_cuda)" OFF)
 option(QSIM_MPI     "Build the distributed backend (qsim_mpi)" OFF)
+option(QSIM_LIKWID  "Build the LIKWID CPU profiling benchmark" OFF)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 # C++ only: nvcc does not accept these flags for .cu files.
@@ -62,6 +63,20 @@ add_executable(stream_triad src/bench/stream_triad.cpp)
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
   target_link_libraries(stream_triad PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+if(QSIM_LIKWID)
+  if(NOT QSIM_OPENMP)
+    message(FATAL_ERROR "QSIM_LIKWID requires QSIM_OPENMP")
+  endif()
+  find_path(LIKWID_INCLUDE_DIR likwid-marker.h
+            HINTS "${LIKWID_ROOT}" ENV EBROOTLIKWID PATH_SUFFIXES include REQUIRED)
+  find_library(LIKWID_LIBRARY likwid
+               HINTS "${LIKWID_ROOT}" ENV EBROOTLIKWID PATH_SUFFIXES lib lib64 REQUIRED)
+  add_executable(qsim_cpu_profile src/bench/qsim_cpu_profile.cpp)
+  target_include_directories(qsim_cpu_profile PRIVATE "${LIKWID_INCLUDE_DIR}")
+  target_compile_definitions(qsim_cpu_profile PRIVATE LIKWID_PERFMON)
+  target_link_libraries(qsim_cpu_profile PRIVATE qsim_core "${LIKWID_LIBRARY}")
 endif()
 
 if(QSIM_CUDA)

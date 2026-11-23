@@ -19,9 +19,9 @@ circuit file ──read_circuit()──▶ Circuit{num_qubits, vector<Gate>}
                               kern::apply_*(amp, nq, ...)         src/qsim/kernels.hpp  (hot loops, header-only)
 ```
 
-* `StateVector` (`state.hpp`) owns 2^n `std::complex<double>` amplitudes,
-  64-byte aligned, allocated without construction. Pages are first touched in
-  `set_zero_state()`, which uses the same static schedule as the kernels.
+* `StateVector` (`state.hpp`) owns 2^n `std::complex<double>` amplitudes in
+  a 4 KiB-aligned allocation. `set_zero_state()` constructs the amplitudes
+  in place and first touches pages using the kernels' static tile partition.
 * `Gate` (`gates.hpp`) is a small POD: `kind`, `q0`, `q1`, `theta`, `m` (2×2
   matrix, only for `U`). `matrix_1q(g)` gives the 2×2 matrix of any one-qubit
   gate and the target action of `CX`/`CY`/`CP`.
@@ -63,11 +63,16 @@ All take a raw `cplx*` and the number of qubits *in that buffer*, never a
 
 ## How each backend plugs in
 
-**OpenMP.** Build with `-DQSIM_OPENMP=ON`. That defines `QSIM_USE_OPENMP` and
-turns `QSIM_PRAGMA_FOR` (already placed on every kernel loop and on the
-initialisation loop) into `#pragma omp parallel for schedule(static)`. Tune
-there: schedule, `collapse`, blocking for low `q`, SIMD. Pinning is set at run
-time with `OMP_PROC_BIND` / `OMP_PLACES`.
+**OpenMP.** Build with `-DQSIM_OPENMP=ON`. State initialization and in-place
+gates use `state_loop.hpp`, which assigns each worker a contiguous static
+range of 4 KiB-equivalent tiles. A tile holds 256 amplitude indices, 128
+pair indices or 64 two-qubit group indices. Inserting the omitted bits
+preserves the cache-line boundaries of each range on an aligned state.
+First-touch and gate ownership match for qubits within a worker's aligned
+range in the power-of-two thread sweep. High qubits can pair amplitudes across
+ranges. The split-buffer MPI kernel uses `schedule(static)` for its separately
+allocated inputs. Set `OMP_DYNAMIC=false` for a fixed team and use
+`OMP_PROC_BIND` / `OMP_PLACES` for runtime affinity.
 
 **MPI.** With `P = 2^p` ranks each rank holds `2^(n-p)` amplitudes. Qubits
 `0 .. n-p-1` are *local*, qubits `n-p .. n-1` are *global* (they are bits of

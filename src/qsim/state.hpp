@@ -22,8 +22,7 @@ class StateVector {
   const cplx& operator[](index i) const { return amp_[i]; }
 
   // Set to |0...0>. The loop that first touches the memory lives here so an
-  // OpenMP build can do first-touch placement with the same static schedule
-  // as the gate kernels.
+  // OpenMP build can use the same static tile partition as the gate kernels.
   void set_zero_state();
   double norm2() const;
   void dump_binary(const std::string& path) const;  // raw complex<double>, index order

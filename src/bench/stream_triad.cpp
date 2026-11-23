@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
+
+#include "stream_loops.hpp"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -22,19 +24,16 @@ int main(int argc, char** argv) {
   const int reps = argc > 2 ? std::atoi(argv[2]) : 10;
   const long n = static_cast<long>(mib * 1024 * 1024 / sizeof(double));
   std::unique_ptr<double[]> a(new double[n]), b(new double[n]), c(new double[n]);
-#pragma omp parallel for schedule(static)
-  for (long i = 0; i < n; ++i) { a[i] = 1.0; b[i] = 2.0; c[i] = 0.0; }
+  stream::initialize(a.get(), b.get(), c.get(), n);
 
   using clk = std::chrono::steady_clock;
   double best_copy = 1e30, best_triad = 1e30;
-  const double s = 3.0;
   for (int r = 0; r < reps; ++r) {
     auto t0 = clk::now();
 #pragma omp parallel for schedule(static)
     for (long i = 0; i < n; ++i) c[i] = a[i];
     auto t1 = clk::now();
-#pragma omp parallel for schedule(static)
-    for (long i = 0; i < n; ++i) a[i] = b[i] + s * c[i];
+    stream::triad(a.get(), b.get(), c.get(), n);
     auto t2 = clk::now();
     best_copy = std::min(best_copy, std::chrono::duration<double>(t1 - t0).count());
     best_triad = std::min(best_triad, std::chrono::duration<double>(t2 - t1).count());

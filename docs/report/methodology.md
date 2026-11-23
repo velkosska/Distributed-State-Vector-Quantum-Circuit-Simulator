@@ -77,11 +77,11 @@ records. For each job it writes `results/<experiment>/<jobid>/`:
 * `raw/`: per-gate timings and the full output of every run.
 
 **Isolation.** Jobs request whole nodes (`--exclusive`), so no other job
-competes for memory bandwidth. **Pinning.** OpenMP threads are bound with
-`OMP_PROC_BIND=close`, `OMP_PLACES=cores`; MPI ranks with `srun --cpu-bind=cores
---exact`. **NUMA.** The state vector is first touched by the initialisation loop
-with the same static schedule as the gate kernels, so each thread's pages are on
-its own NUMA domain.
+competes for memory bandwidth. The OpenMP strong-scaling job compares
+`OMP_PROC_BIND=close` and `spread` with `OMP_PLACES=cores`. MPI ranks use
+`srun --cpu-bind=cores --exact`. The initialization loop uses the kernels'
+static tile partition for NUMA first touch. Gates on high qubits can access
+pages first touched by another worker.
 
 **Repeats and statistics.** Each configuration is run **3 times** inside the same
 job, on the same nodes, one after the other. We report the **median** and show
