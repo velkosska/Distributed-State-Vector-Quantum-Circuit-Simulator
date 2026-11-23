@@ -1,0 +1,5 @@
+[harness 21:46:27] experiment=mpi_weak job=36745 out=results/mpi_weak/36745
+[harness 21:53:00] r0001 random n=32 P=16 T=2 rep=1 total_s=386.488761 wall=393.04s ok
+[harness 22:09:07] r0002 random n=32 P=16 T=2 rep=2 total_s=955.863149 wall=966.70s ok
+[harness 22:15:24] r0003 random n=32 P=16 T=2 rep=3 total_s=371.258305 wall=376.33s ok
+[harness 22:15:24] done: results/mpi_weak/36745 (3 runs, 0 failed)

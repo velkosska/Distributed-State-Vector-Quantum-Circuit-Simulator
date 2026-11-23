@@ -1,0 +1,5 @@
+[harness 21:46:27] experiment=mpi_strong job=36593 out=results/mpi_strong/36593
+[harness 21:47:46] r0001 qft n=30 P=32 T=2 rep=1 total_s=74.1524892 wall=78.16s ok
+[harness 21:49:02] r0002 qft n=30 P=32 T=2 rep=2 total_s=72.8284503 wall=76.29s ok
+[harness 21:50:19] r0003 qft n=30 P=32 T=2 rep=3 total_s=73.701927 wall=77.04s ok
+[harness 21:50:19] done: results/mpi_strong/36593 (3 runs, 0 failed)

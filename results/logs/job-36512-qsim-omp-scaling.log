@@ -1,0 +1,98 @@
+-- The CXX compiler identification is GNU 12.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen2/software/GCCcore/12.3.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- qsim: rpath to compiler runtime /cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen2/software/GCCcore/12.3.0/lib64
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- qsim: build=Release native=ON openmp=ON mpi=OFF cuda=OFF
+-- Configuring done (0.7s)
+-- Generating done (0.5s)
+-- Build files have been written to: /home/hpcb37/qsim/build-omp-36512
+[ 25%] Building CXX object CMakeFiles/qsim_core.dir/src/qsim/circuit.cpp.o
+[ 37%] Building CXX object CMakeFiles/qsim_core.dir/src/qsim/simulator.cpp.o
+[ 25%] Building CXX object CMakeFiles/qsim_core.dir/src/qsim/state.cpp.o
+[ 50%] Building CXX object CMakeFiles/qsim_core.dir/src/qsim/gates.cpp.o
+[ 62%] Building CXX object CMakeFiles/qsim_core.dir/src/qsim/fusion.cpp.o
+[ 75%] Linking CXX static library libqsim_core.a
+[ 75%] Built target qsim_core
+[ 87%] Building CXX object CMakeFiles/qsim.dir/src/apps/qsim_main.cpp.o
+[100%] Linking CXX executable qsim
+[100%] Built target qsim
+[harness 15:20:58] experiment=openmp_strong job=36512 out=results/openmp_strong/36512
+[harness 15:22:26] r0001 qft n=28 P=1 T=1 rep=1 total_s=86.2052668 wall=87.46s ok
+[harness 15:24:03] r0002 random n=28 P=1 T=1 rep=1 total_s=95.9031857 wall=97.05s ok
+[harness 15:25:30] r0003 qft n=28 P=1 T=1 rep=2 total_s=85.3894965 wall=86.68s ok
+[harness 15:27:07] r0004 random n=28 P=1 T=1 rep=2 total_s=95.5904347 wall=96.72s ok
+[harness 15:28:33] r0005 qft n=28 P=1 T=1 rep=3 total_s=84.852145 wall=85.98s ok
+[harness 15:30:11] r0006 random n=28 P=1 T=1 rep=3 total_s=96.833883 wall=98.07s ok
+[harness 15:31:38] r0007 qft n=28 P=1 T=1 rep=1 total_s=85.7943395 wall=86.93s ok
+[harness 15:33:15] r0008 random n=28 P=1 T=1 rep=1 total_s=95.6792927 wall=96.77s ok
+[harness 15:34:42] r0009 qft n=28 P=1 T=1 rep=2 total_s=85.9239026 wall=87.13s ok
+[harness 15:36:20] r0010 random n=28 P=1 T=1 rep=2 total_s=96.5731353 wall=97.68s ok
+[harness 15:37:45] r0011 qft n=28 P=1 T=1 rep=3 total_s=84.4367866 wall=85.53s ok
+[harness 15:39:23] r0012 random n=28 P=1 T=1 rep=3 total_s=96.415703 wall=97.52s ok
+[harness 15:40:13] r0013 qft n=28 P=1 T=2 rep=1 total_s=49.6299775 wall=50.39s ok
+[harness 15:41:09] r0014 random n=28 P=1 T=2 rep=1 total_s=54.7688295 wall=55.52s ok
+[harness 15:41:59] r0015 qft n=28 P=1 T=2 rep=2 total_s=49.4051445 wall=50.14s ok
+[harness 15:42:54] r0016 random n=28 P=1 T=2 rep=2 total_s=54.1065166 wall=55.06s ok
+[harness 15:43:45] r0017 qft n=28 P=1 T=2 rep=3 total_s=50.2120319 wall=51.09s ok
+[harness 15:44:42] r0018 random n=28 P=1 T=2 rep=3 total_s=55.5149267 wall=56.25s ok
+[harness 15:45:31] r0019 qft n=28 P=1 T=2 rep=1 total_s=48.8506688 wall=49.70s ok
+[harness 15:46:29] r0020 random n=28 P=1 T=2 rep=1 total_s=56.5283778 wall=57.45s ok
+[harness 15:47:20] r0021 qft n=28 P=1 T=2 rep=2 total_s=50.2452965 wall=51.10s ok
+[harness 15:48:16] r0022 random n=28 P=1 T=2 rep=2 total_s=54.9175027 wall=55.86s ok
+[harness 15:49:11] r0023 qft n=28 P=1 T=2 rep=3 total_s=54.5202554 wall=55.49s ok
+[harness 15:50:11] r0024 random n=28 P=1 T=2 rep=3 total_s=58.4599276 wall=59.34s ok
+[harness 15:50:48] r0025 qft n=28 P=1 T=4 rep=1 total_s=35.1185611 wall=36.97s ok
+[harness 15:51:30] r0026 random n=28 P=1 T=4 rep=1 total_s=41.4702874 wall=42.07s ok
+[harness 15:52:04] r0027 qft n=28 P=1 T=4 rep=2 total_s=33.7993556 wall=34.39s ok
+[harness 15:52:45] r0028 random n=28 P=1 T=4 rep=2 total_s=39.6671992 wall=40.25s ok
+[harness 15:53:18] r0029 qft n=28 P=1 T=4 rep=3 total_s=32.5569347 wall=33.14s ok
+[harness 15:53:56] r0030 random n=28 P=1 T=4 rep=3 total_s=37.8477794 wall=38.41s ok
+[harness 15:54:26] r0031 qft n=28 P=1 T=4 rep=1 total_s=29.133682 wall=29.75s ok
+[harness 15:54:58] r0032 random n=28 P=1 T=4 rep=1 total_s=31.4974539 wall=32.11s ok
+[harness 15:55:27] r0033 qft n=28 P=1 T=4 rep=2 total_s=28.3504555 wall=28.98s ok
+[harness 15:56:00] r0034 random n=28 P=1 T=4 rep=2 total_s=31.5258707 wall=32.22s ok
+[harness 15:56:28] r0035 qft n=28 P=1 T=4 rep=3 total_s=27.8271393 wall=28.55s ok
+[harness 15:56:59] r0036 random n=28 P=1 T=4 rep=3 total_s=30.4699525 wall=31.08s ok
+[harness 15:57:24] r0037 qft n=28 P=1 T=8 rep=1 total_s=23.8880722 wall=24.42s ok
+[harness 15:57:57] r0038 random n=28 P=1 T=8 rep=1 total_s=32.3289516 wall=33.15s ok
+[harness 15:58:21] r0039 qft n=28 P=1 T=8 rep=2 total_s=23.8576766 wall=24.33s ok
+[harness 15:58:54] r0040 random n=28 P=1 T=8 rep=2 total_s=31.6837092 wall=32.27s ok
+[harness 15:59:17] r0041 qft n=28 P=1 T=8 rep=3 total_s=23.1933819 wall=23.68s ok
+[harness 15:59:50] r0042 random n=28 P=1 T=8 rep=3 total_s=31.6585657 wall=32.12s ok
+[harness 16:00:09] r0043 qft n=28 P=1 T=8 rep=1 total_s=18.9929284 wall=19.52s ok
+[harness 16:00:34] r0044 random n=28 P=1 T=8 rep=1 total_s=23.9266706 wall=24.44s ok
+[harness 16:00:53] r0045 qft n=28 P=1 T=8 rep=2 total_s=18.8536789 wall=19.37s ok
+[harness 16:01:18] r0046 random n=28 P=1 T=8 rep=2 total_s=23.9018898 wall=24.42s ok
+[harness 16:01:37] r0047 qft n=28 P=1 T=8 rep=3 total_s=19.0652686 wall=19.59s ok
+[harness 16:02:01] r0048 random n=28 P=1 T=8 rep=3 total_s=23.5721235 wall=24.09s ok
+[harness 16:02:18] r0049 qft n=28 P=1 T=16 rep=1 total_s=16.5691363 wall=17.02s ok
+[harness 16:02:42] r0050 random n=28 P=1 T=16 rep=1 total_s=23.1907236 wall=23.65s ok
+[harness 16:02:59] r0051 qft n=28 P=1 T=16 rep=2 total_s=16.2596558 wall=16.70s ok
+[harness 16:03:22] r0052 random n=28 P=1 T=16 rep=2 total_s=22.8241034 wall=23.27s ok
+[harness 16:03:39] r0053 qft n=28 P=1 T=16 rep=3 total_s=16.2523956 wall=16.80s ok
+[harness 16:04:02] r0054 random n=28 P=1 T=16 rep=3 total_s=22.7906726 wall=23.23s ok
+[harness 16:04:18] r0055 qft n=28 P=1 T=16 rep=1 total_s=15.1469805 wall=15.60s ok
+[harness 16:04:40] r0056 random n=28 P=1 T=16 rep=1 total_s=21.2381876 wall=21.69s ok
+[harness 16:04:55] r0057 qft n=28 P=1 T=16 rep=2 total_s=15.127761 wall=15.58s ok
+[harness 16:05:17] r0058 random n=28 P=1 T=16 rep=2 total_s=21.2318145 wall=21.68s ok
+[harness 16:05:33] r0059 qft n=28 P=1 T=16 rep=3 total_s=15.1485812 wall=15.98s ok
+[harness 16:05:55] r0060 random n=28 P=1 T=16 rep=3 total_s=21.3188914 wall=21.77s ok
+[harness 16:06:09] r0061 qft n=28 P=1 T=32 rep=1 total_s=13.8583443 wall=14.34s ok
+[harness 16:06:31] r0062 random n=28 P=1 T=32 rep=1 total_s=20.6792774 wall=21.13s ok
+[harness 16:06:46] r0063 qft n=28 P=1 T=32 rep=2 total_s=14.0614953 wall=14.52s ok
+[harness 16:07:07] r0064 random n=28 P=1 T=32 rep=2 total_s=20.6264161 wall=21.09s ok
+[harness 16:07:21] r0065 qft n=28 P=1 T=32 rep=3 total_s=13.9757523 wall=14.45s ok
+[harness 16:07:42] r0066 random n=28 P=1 T=32 rep=3 total_s=20.5281268 wall=20.98s ok
+[harness 16:07:57] r0067 qft n=28 P=1 T=32 rep=1 total_s=14.0832055 wall=14.55s ok
+[harness 16:08:18] r0068 random n=28 P=1 T=32 rep=1 total_s=20.6402934 wall=21.13s ok
+[harness 16:08:32] r0069 qft n=28 P=1 T=32 rep=2 total_s=14.0245571 wall=14.50s ok
+[harness 16:08:54] r0070 random n=28 P=1 T=32 rep=2 total_s=20.669146 wall=21.13s ok
+[harness 16:09:08] r0071 qft n=28 P=1 T=32 rep=3 total_s=13.8366885 wall=14.33s ok
+[harness 16:09:29] r0072 random n=28 P=1 T=32 rep=3 total_s=20.5799077 wall=21.08s ok
+[harness 16:09:29] done: results/openmp_strong/36512 (72 runs, 0 failed)

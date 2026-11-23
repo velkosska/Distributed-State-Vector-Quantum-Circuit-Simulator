@@ -1,0 +1,61 @@
+gmake[3]: Warning: File 'libqsim_core.a' has modification time 0.00027 s in the future
+gmake[3]: warning:  Clock skew detected.  Your build may be incomplete.
+[harness 16:18:59] experiment=fusion job=36514 out=results/fusion/36514
+[harness 16:19:04] r0001 qft n=24 P=1 T=1 rep=1 total_s=4.20601903 wall=4.28s ok
+[harness 16:19:08] r0002 qft n=24 P=1 T=1 rep=1 total_s=4.27835956 wall=4.35s ok
+[harness 16:19:12] r0003 qft n=24 P=1 T=1 rep=2 total_s=4.18044389 wall=4.26s ok
+[harness 16:19:17] r0004 qft n=24 P=1 T=1 rep=2 total_s=4.27584007 wall=4.35s ok
+[harness 16:19:21] r0005 qft n=24 P=1 T=1 rep=3 total_s=4.17804521 wall=4.25s ok
+[harness 16:19:26] r0006 qft n=24 P=1 T=1 rep=3 total_s=4.22278401 wall=4.30s ok
+[harness 16:19:26] r0007 qft n=24 P=1 T=32 rep=1 total_s=0.467615543 wall=0.50s ok
+[harness 16:19:27] r0008 qft n=24 P=1 T=32 rep=1 total_s=0.449018588 wall=0.48s ok
+[harness 16:19:27] r0009 qft n=24 P=1 T=32 rep=2 total_s=0.441020355 wall=0.48s ok
+[harness 16:19:28] r0010 qft n=24 P=1 T=32 rep=2 total_s=0.452908695 wall=0.49s ok
+[harness 16:19:28] r0011 qft n=24 P=1 T=32 rep=3 total_s=0.43461904 wall=0.47s ok
+[harness 16:19:29] r0012 qft n=24 P=1 T=32 rep=3 total_s=0.441299708 wall=0.48s ok
+[harness 16:20:53] r0013 qft n=28 P=1 T=1 rep=1 total_s=83.0541591 wall=84.10s ok
+[harness 16:22:18] r0014 qft n=28 P=1 T=1 rep=1 total_s=83.6214846 wall=84.69s ok
+[harness 16:23:43] r0015 qft n=28 P=1 T=1 rep=2 total_s=83.7286789 wall=84.77s ok
+[harness 16:25:08] r0016 qft n=28 P=1 T=1 rep=2 total_s=84.3957016 wall=85.43s ok
+[harness 16:26:32] r0017 qft n=28 P=1 T=1 rep=3 total_s=82.5235254 wall=83.56s ok
+[harness 16:27:57] r0018 qft n=28 P=1 T=1 rep=3 total_s=83.9572414 wall=84.99s ok
+[harness 16:28:11] r0019 qft n=28 P=1 T=32 rep=1 total_s=13.9829583 wall=14.44s ok
+[harness 16:28:25] r0020 qft n=28 P=1 T=32 rep=1 total_s=13.7394894 wall=14.14s ok
+[harness 16:28:40] r0021 qft n=28 P=1 T=32 rep=2 total_s=13.9922161 wall=14.43s ok
+[harness 16:28:54] r0022 qft n=28 P=1 T=32 rep=2 total_s=13.7658804 wall=14.19s ok
+[harness 16:29:09] r0023 qft n=28 P=1 T=32 rep=3 total_s=14.1052882 wall=14.54s ok
+[harness 16:29:23] r0024 qft n=28 P=1 T=32 rep=3 total_s=13.7366838 wall=14.16s ok
+[harness 16:29:28] r0025 random n=24 P=1 T=1 rep=1 total_s=5.17584513 wall=5.25s ok
+[harness 16:29:31] r0026 random n=24 P=1 T=1 rep=1 total_s=2.46571775 wall=2.54s ok
+[harness 16:29:36] r0027 random n=24 P=1 T=1 rep=2 total_s=5.15338806 wall=5.23s ok
+[harness 16:29:39] r0028 random n=24 P=1 T=1 rep=2 total_s=2.48546314 wall=2.56s ok
+[harness 16:29:44] r0029 random n=24 P=1 T=1 rep=3 total_s=5.14638088 wall=5.22s ok
+[harness 16:29:47] r0030 random n=24 P=1 T=1 rep=3 total_s=2.50078696 wall=2.57s ok
+[harness 16:29:47] r0031 random n=24 P=1 T=32 rep=1 total_s=0.852667244 wall=0.89s ok
+[harness 16:29:48] r0032 random n=24 P=1 T=32 rep=1 total_s=0.386153729 wall=0.42s ok
+[harness 16:29:49] r0033 random n=24 P=1 T=32 rep=2 total_s=0.824122986 wall=0.86s ok
+[harness 16:29:49] r0034 random n=24 P=1 T=32 rep=2 total_s=0.381301335 wall=0.42s ok
+[harness 16:29:50] r0035 random n=24 P=1 T=32 rep=3 total_s=0.823461911 wall=0.86s ok
+[harness 16:29:51] r0036 random n=24 P=1 T=32 rep=3 total_s=0.391679857 wall=0.43s ok
+[harness 16:31:27] r0037 random n=28 P=1 T=1 rep=1 total_s=94.9783781 wall=96.05s ok
+[harness 16:32:09] r0038 random n=28 P=1 T=1 rep=1 total_s=41.308953 wall=42.36s ok
+[harness 16:33:45] r0039 random n=28 P=1 T=1 rep=2 total_s=95.2331768 wall=96.29s ok
+[harness 16:34:28] r0040 random n=28 P=1 T=1 rep=2 total_s=41.3176636 wall=42.39s ok
+[harness 16:36:04] r0041 random n=28 P=1 T=1 rep=3 total_s=94.6507478 wall=95.77s ok
+[harness 16:36:48] r0042 random n=28 P=1 T=1 rep=3 total_s=42.8553243 wall=44.04s ok
+[harness 16:37:09] r0043 random n=28 P=1 T=32 rep=1 total_s=20.542374 wall=21.02s ok
+[harness 16:37:18] r0044 random n=28 P=1 T=32 rep=1 total_s=8.49384533 wall=8.92s ok
+[harness 16:37:39] r0045 random n=28 P=1 T=32 rep=2 total_s=20.6469188 wall=21.07s ok
+[harness 16:37:48] r0046 random n=28 P=1 T=32 rep=2 total_s=8.56654673 wall=8.99s ok
+[harness 16:38:09] r0047 random n=28 P=1 T=32 rep=3 total_s=20.403767 wall=20.82s ok
+[harness 16:38:18] r0048 random n=28 P=1 T=32 rep=3 total_s=8.53103331 wall=8.94s ok
+[harness 16:38:18] done: results/fusion/36514 (48 runs, 0 failed)
+  kind  qubits  threads  gates_none  gates_1q  gate_reduction_pct  median_s_none  median_s_1q  speedup
+   qft      24        1         336       335               0.298           4.18         4.28    0.978
+   qft      24       32         336       335               0.298          0.441        0.449    0.982
+   qft      28        1         448       447               0.223           83.1           84    0.989
+   qft      28       32         448       447               0.223             14         13.7     1.02
+random      24        1         298       143                  52           5.15         2.49     2.07
+random      24       32         298       143                  52          0.824        0.386     2.13
+random      28        1         349       158                54.7             95         41.3      2.3
+random      28       32         349       158                54.7           20.5         8.53     2.41

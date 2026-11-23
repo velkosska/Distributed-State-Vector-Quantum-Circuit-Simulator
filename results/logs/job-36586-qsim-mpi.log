@@ -1,0 +1,20 @@
+[harness 19:28:26] experiment=mpi_strong job=36586 out=results/mpi_strong/36586
+[harness 19:34:37] r0001 random n=30 P=1 T=2 rep=1 total_s=365.068761 wall=370.47s ok
+[harness 19:42:36] r0002 random n=30 P=1 T=2 rep=2 total_s=472.866095 wall=479.29s ok
+[harness 19:48:47] r0003 random n=30 P=1 T=2 rep=3 total_s=365.106153 wall=370.76s ok
+[harness 19:53:05] r0004 random n=30 P=2 T=2 rep=1 total_s=252.748801 wall=257.40s ok
+[harness 19:57:47] r0005 random n=30 P=2 T=2 rep=2 total_s=277.159138 wall=281.89s ok
+[harness 20:02:04] r0006 random n=30 P=2 T=2 rep=3 total_s=252.838615 wall=257.29s ok
+[harness 20:06:47] r0007 random n=30 P=4 T=2 rep=1 total_s=277.966395 wall=282.83s ok
+[harness 20:09:55] r0008 random n=30 P=4 T=2 rep=2 total_s=184.145859 wall=187.90s ok
+[harness 20:14:38] r0009 random n=30 P=4 T=2 rep=3 total_s=278.394822 wall=283.39s ok
+[harness 20:17:42] r0010 random n=30 P=8 T=2 rep=1 total_s=179.905734 wall=183.63s ok
+[harness 20:22:45] r0011 random n=30 P=8 T=2 rep=2 total_s=296.83306 wall=302.46s ok
+[harness 20:25:51] r0012 random n=30 P=8 T=2 rep=3 total_s=182.49272 wall=186.03s ok
+[harness 20:29:13] r0013 random n=30 P=16 T=2 rep=1 total_s=194.275331 wall=202.73s ok
+[harness 20:32:30] r0014 random n=30 P=16 T=2 rep=2 total_s=192.12793 wall=196.13s ok
+[harness 20:35:51] r0015 random n=30 P=16 T=2 rep=3 total_s=194.323535 wall=200.95s ok
+[harness 20:59:15] r0016 random n=30 P=32 T=2 rep=1 total_s=1397.2368 wall=1404.42s ok
+[harness 21:22:39] r0017 random n=30 P=32 T=2 rep=2 total_s=1396.85805 wall=1403.58s ok
+[harness 21:46:15] r0018 random n=30 P=32 T=2 rep=3 total_s=1409.35493 wall=1416.29s ok
+[harness 21:46:15] done: results/mpi_strong/36586 (18 runs, 0 failed)

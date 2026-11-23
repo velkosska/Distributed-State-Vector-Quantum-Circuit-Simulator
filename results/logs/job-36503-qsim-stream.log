@@ -1,0 +1,8 @@
+[harness 14:55:25] experiment=stream job=36503 out=results/stream/36503
+threads=1 triad=41.490 GB/s
+threads=2 triad=53.569 GB/s
+threads=4 triad=52.776 GB/s
+threads=8 triad=57.893 GB/s
+threads=16 triad=78.604 GB/s
+threads=32 triad=81.933 GB/s
+[harness 14:55:41] done: results/stream/36503 (0 runs, 0 failed)

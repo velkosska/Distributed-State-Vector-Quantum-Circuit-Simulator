@@ -1,0 +1,17 @@
+[harness 16:38:25] experiment=mpi_strong job=36515 out=results/mpi_strong/36515
+[harness 16:43:33] r0001 qft n=30 P=1 T=2 rep=1 total_s=301.857037 wall=307.02s ok
+[harness 16:51:23] r0002 qft n=30 P=1 T=2 rep=2 total_s=463.998474 wall=470.67s ok
+[harness 16:56:04] r0003 qft n=30 P=1 T=2 rep=3 total_s=275.319502 wall=280.22s ok
+[harness 17:00:28] r0004 qft n=30 P=2 T=2 rep=1 total_s=259.161288 wall=264.50s ok
+[harness 17:03:06] r0005 qft n=30 P=2 T=2 rep=2 total_s=154.478194 wall=158.11s ok
+[harness 17:07:30] r0006 qft n=30 P=2 T=2 rep=3 total_s=258.849744 wall=264.07s ok
+[harness 17:09:26] r0007 qft n=30 P=4 T=2 rep=1 total_s=112.440289 wall=115.57s ok
+[harness 17:14:22] r0008 qft n=30 P=4 T=2 rep=2 total_s=290.772568 wall=295.97s ok
+[harness 17:16:17] r0009 qft n=30 P=4 T=2 rep=3 total_s=111.667158 wall=114.86s ok
+[harness 17:21:56] r0010 qft n=30 P=8 T=2 rep=1 total_s=331.747567 wall=339.19s ok
+[harness 17:23:06] r0011 qft n=30 P=8 T=2 rep=2 total_s=66.7503596 wall=69.70s ok
+[harness 17:28:24] r0012 qft n=30 P=8 T=2 rep=3 total_s=310.858161 wall=318.24s ok
+[harness 17:29:25] r0013 qft n=30 P=16 T=2 rep=1 total_s=57.15535 wall=60.66s ok
+[harness 17:32:12] r0014 qft n=30 P=16 T=2 rep=2 total_s=157.401156 wall=166.41s ok
+[harness 17:33:12] r0015 qft n=30 P=16 T=2 rep=3 total_s=57.1948691 wall=60.53s ok
+slurmstepd-fortran: error: *** JOB 36515 ON fortran CANCELLED AT 2026-11-23T17:41:45 DUE TO PREEMPTION ***
