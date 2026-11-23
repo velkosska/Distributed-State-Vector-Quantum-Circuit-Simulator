@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=qsim-mpi
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=8      # ranks per node (power of two); threads per rank below
-#SBATCH --cpus-per-task=16       # OpenMP threads per rank (1 for pure MPI)
-#SBATCH --exclusive
-#SBATCH --mem=0
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=16     # ranks per node (power of two); threads per rank below
+#SBATCH --cpus-per-task=2        # one physical core per rank (OpenMP threads per rank = this)
+#SBATCH --mem=100G               # per node; 33 qubits on 32 ranks = 64 GiB per node
 #SBATCH --time=04:00:00
 #SBATCH --output=slurm-%x-%j.out
 ##SBATCH --partition=CHANGE_ME
@@ -13,9 +12,14 @@
 # MPI strong and weak scaling. One srun step per rank count, ranks P = 1,2,4,..
 # up to the allocation. Submit from the repo root.
 #
-#   MODE=strong N=30 sbatch slurm/mpi_scaling.sbatch          # fixed 30 qubits
+#   MODE=strong N=30 sbatch slurm/mpi_scaling.sbatch          # fixed 30 qubits, P = 1..32 (16 per node)
 #   MODE=weak   N=28 sbatch slurm/mpi_scaling.sbatch          # 28q at P=1, +1 qubit per doubling
-#   MODE=weak N=30 sbatch --nodes=16 slurm/mpi_scaling.sbatch
+#   MODE=strong N=30 sbatch --ntasks-per-node=8 slurm/mpi_scaling.sbatch   # P=16 spread over 2 nodes
+#   MODE=strong N=30 sbatch --nodes=1 --ntasks-per-node=32 slurm/mpi_scaling.sbatch  # 1 node only
+#
+# Course QOS "student": at most 64 CPUs per user (32 physical cores with 2 hardware
+# threads each) and no --exclusive, or the job waits forever (QOSMaxCpuPerUserLimit).
+# nodes x ntasks-per-node x cpus-per-task must stay <= 64.
 #
 # Expects Edard's MPI build at build-mpi/qsim_mpi with the same CLI and
 # SUMMARY line as build/qsim (add ranks=/threads= to SUMMARY if you can).

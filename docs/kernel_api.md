@@ -9,7 +9,7 @@ code is the reference: every other backend must reproduce its final state to
 ```
 circuit file ──read_circuit()──▶ Circuit{num_qubits, vector<Gate>}
                                    │
-                                   ▼  fuse(gates, n, mode)        src/qsim/fusion.*   (optimisation 1 hook)
+                                   ▼  fuse(gates, n, mode)        src/qsim/fusion.*   (optimisation 1)
                               vector<Gate>
                                    │
                                    ▼  run(state, gates)           src/qsim/simulator.*  (timing per gate)
@@ -97,10 +97,19 @@ Implemented in `src/qsim/cuda/cuda_sim.cu` (app `qsim_cuda`, CMake option
 `d2h_s`; `total_s` is gate time only. Build + validate on the cluster with
 `sbatch slurm/cuda_validate.sbatch`.
 
-**Gate fusion.** `fuse()` in `fusion.cpp` runs before `run()`. Mode `none`
-returns the list unchanged; mode `1q` is reserved for merging consecutive
-single-qubit gates on the same qubit into one `GateKind::U`. Because fusion
-outputs ordinary `Gate`s, every backend benefits without changes.
+**Gate fusion.** `fuse()` in `fusion.cpp` runs before `run()` (all three
+apps: `--fusion none|1q`). Mode `none` returns the list unchanged. Mode `1q`
+merges every run of single-qubit gates on the same qubit into one gate; gates
+on other qubits do not end a run. Diagonal runs are carried past CZ/CP and the
+control of CX/CY (they commute), and SWAP moves pending runs across. A merged
+run becomes a `U` with the 2x2 product, a `P` if the product is diagonal (so
+it stays a half-sweep and needs no MPI exchange on a global qubit), or nothing
+if it is the identity up to a phase. The global phases dropped this way are
+folded back into one dense gate, so the final state matches the unfused
+circuit exactly (validated against Qiskit at 1e-10 in CI, serial and on 4 MPI
+ranks). Because fusion outputs ordinary `Gate`s, every backend benefits
+without changes. Tests: `tests/test_fusion.cpp`; experiment:
+`slurm/fusion.sbatch` + `analysis/fusion.py`.
 
 ## Timing output
 

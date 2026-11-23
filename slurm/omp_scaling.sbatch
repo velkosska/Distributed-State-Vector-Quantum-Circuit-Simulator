@@ -3,17 +3,18 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
-#SBATCH --exclusive
-#SBATCH --mem=0
+#SBATCH --mem=64G
 #SBATCH --time=04:00:00
 #SBATCH --output=slurm-%x-%j.out
 #
-# Set --cpus-per-task to the node's physical core count if it has more than 64,
-# so spread can use places across the node. Submit from the repo root.
+# OpenMP strong scaling, 28 qubits, close vs spread. Submit from the repo root.
+# Course QOS "student": at most 64 CPUs per user (32 physical cores with 2 hardware
+# threads each) and no --exclusive, or the job waits forever (QOSMaxCpuPerUserLimit).
+# 64 CPUs = 32 physical cores, so the default sweep stops at 32 threads.
 set -euo pipefail
 
 N=${N:-28}
-THREADS=${THREADS:-"1 2 4 8 16 32 64"}
+THREADS=${THREADS:-"1 2 4 8 16 32"}
 REPEATS=${REPEATS:-3}
 SEED=${SEED:-1}
 RANDOM_DEPTH=${RANDOM_DEPTH:-10}
