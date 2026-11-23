@@ -1,0 +1,105 @@
+--- node julia, commit 5a53b81
+
+Currently Loaded Modules:
+  1) GCCcore/12.3.0                    7) Tcl/8.6.13-GCCcore-12.3.0
+  2) GCC/12.3.0                        8) SQLite/3.42.0-GCCcore-12.3.0
+  3) OpenSSL/1.1                       9) libffi/3.4.4-GCCcore-12.3.0
+  4) cURL/8.0.1-GCCcore-12.3.0        10) Python/3.11.3-GCCcore-12.3.0
+  5) libarchive/3.6.2-GCCcore-12.3.0  11) hpc-course-cuda/12.8.1
+  6) CMake/3.26.3-GCCcore-12.3.0
+
+ 
+
+Fri Nov 20 14:42:39 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX PRO 6000 Blac...    Off |   00000001:C5:00.0 Off |                    0 |
+| N/A   51C    P0            101W /  450W |       0MiB /  97887MiB |    100%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+--- CUDA_ARCH=120
+--- no cmake in the container, building with nvcc directly
+qft n=10 prep_seed=1 swaps=True gates=70
+device NVIDIA RTX PRO 6000 Blackwell Server Edition
+qubits 10, state 0.016 MiB
+gate      count       total_s        mean_s     GB/s
+cp           45      0.000237     5.277e-06      1.55
+h            10      0.000063     6.275e-06      5.22
+ry           10      0.009759     9.759e-04      0.03
+swap          5      0.000030     6.022e-06      2.72
+SUMMARY qubits=10 gates_in=70 gates_run=70 fusion=none total_s=0.0105791359 mean_gate_s=0.000151130513 norm_err=1.88737914e-15 h2d_s=0.000154880002 d2h_s=1.92000009e-05
+--- validating build-cuda/qsim_cuda up to 20 qubits
+kind       n   gates   max_abs_err    qsim_s  qiskit_s  result
+qft        2       6     0.000e+00     0.272     3.311  ok
+qft        3      10     1.388e-17     0.331     0.001  ok
+qft        4      16     7.850e-17     0.234     0.001  ok
+qft        5      22     9.714e-17     0.231     0.001  ok
+qft        6      30     9.160e-17     0.244     0.002  ok
+qft        7      38     7.076e-17     0.231     0.002  ok
+qft        8      48     5.378e-17     0.230     0.002  ok
+qft        9      58     4.163e-17     0.236     0.002  ok
+qft       10      70     4.291e-17     0.227     0.003  ok
+qft       11      82     3.030e-17     0.236     0.003  ok
+qft       12      96     2.410e-17     0.236     0.004  ok
+qft       13     110     2.793e-17     0.234     0.006  ok
+qft       14     126     3.398e-17     0.230     0.011  ok
+qft       15     142     2.062e-17     0.239     0.021  ok
+qft       16     160     2.082e-17     0.241     0.071  ok
+qft       17     178     1.595e-17     0.248     0.149  ok
+qft       18     198     1.599e-17     0.274     0.238  ok
+qft       19     218     9.697e-18     0.254     0.454  ok
+qft       20     240     7.152e-18     0.314     1.137  ok
+grover     2      14     2.362e-17     0.236     0.002  ok
+grover     3      99     1.247e-15     0.240     0.002  ok
+grover     4      99     1.247e-15     0.231     0.002  ok
+grover     5     346     6.103e-15     0.239     0.007  ok
+grover     6     346     6.103e-15     0.232     0.007  ok
+grover     7     725     1.278e-14     0.235     0.013  ok
+grover     8     725     1.278e-14     0.235     0.014  ok
+grover     9    1470     2.581e-14     0.232     0.028  ok
+grover    10    1470     2.581e-14     0.237     0.030  ok
+grover    11    2487     4.404e-14     0.289     0.056  ok
+grover    12    2487     4.404e-14     0.245     0.067  ok
+grover    13     756     3.830e-15     0.230     0.026  ok
+grover    14     756     3.830e-15     0.235     0.041  ok
+grover    15     885     3.009e-15     0.231     0.090  ok
+grover    16     885     3.009e-15     0.251     0.154  ok
+grover    17    1014     2.517e-15     0.242     0.293  ok
+grover    18    1014     2.517e-15     0.242     0.551  ok
+grover    19    1147     2.031e-15     0.267     1.114  ok
+grover    20    1147     2.031e-15     0.256     4.223  ok
+random     2      26     2.001e-16     0.318     0.002  ok
+random     3      37     1.755e-16     0.239     0.001  ok
+random     4      51     2.989e-16     0.235     0.002  ok
+random     5      58     2.082e-16     0.232     0.002  ok
+random     6      71     1.777e-16     0.237     0.002  ok
+random     7      88     1.944e-16     0.240     0.002  ok
+random     8     102     2.168e-16     0.229     0.003  ok
+random     9     104     1.924e-16     0.233     0.003  ok
+random    10     129     2.858e-16     0.229     0.004  ok
+random    11     134     8.356e-17     0.233     0.004  ok
+random    12     150     1.010e-16     0.227     0.005  ok
+random    13     158     6.836e-17     0.227     0.007  ok
+random    14     177     5.898e-17     0.224     0.011  ok
+random    15     187     3.199e-17     0.238     0.022  ok
+random    16     193     3.166e-17     0.249     0.039  ok
+random    17     203     8.274e-17     0.240     0.067  ok
+random    18     229     9.310e-17     0.242     0.139  ok
+random    19     234     4.629e-17     0.243     0.256  ok
+random    20     250     1.263e-17     0.253     1.035  ok
+
+57/57 cases within tolerance 1e-10
+done: validation passed, see build-cuda/validation.csv
