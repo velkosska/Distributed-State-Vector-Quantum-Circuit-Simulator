@@ -17,6 +17,9 @@
 # (override with CUDA_ARCH=89 etc.). For benchmarks, pin one node so all
 # numbers come from the same card.
 #
+# Output, same layout as slurm/validate.sbatch: results/validation/<jobid>/
+#   git_commit.txt, validation.csv, validation.txt (+ gpu.txt: card, driver, arch, binary)
+#
 # One-time setup on the login node first: bash env/setup_venv.sh (numpy + qiskit).
 # CUDA on this cluster is an Apptainer container: every CUDA command runs via cuda-exec.
 
@@ -28,11 +31,24 @@ ROOT="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$ROOT"
 set +u; source env/modules.sh cuda; set -u   # GCC, CMake, Python + venv, course CUDA container
 
+JOBID=${SLURM_JOB_ID:-local-$(date +%Y%m%d-%H%M%S)}
+OUT="results/validation/$JOBID"
+mkdir -p "$OUT"
+git rev-parse --verify -q HEAD > "$OUT/git_commit.txt" || echo unknown > "$OUT/git_commit.txt"
+
 echo "--- node $(hostname), commit $(git rev-parse --short HEAD)"
 module list 2>&1
 cuda-exec nvidia-smi
 
 source slurm/lib/build_cuda.sh             # sets CUDA_ARCH, CUDA_BUILD, QSIM_CUDA_BIN
+{
+  echo "backend:     cuda"
+  echo "host:        $(hostname)"
+  echo "gpu:         $(cuda-exec nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader | head -1)"
+  echo "cuda_arch:   sm_$CUDA_ARCH"
+  echo "binary:      $QSIM_CUDA_BIN"
+  echo "git_dirty:   $(git status --porcelain -- . ':(exclude)results' | grep -q . && echo yes || echo no)"
+} > "$OUT/gpu.txt"
 
 # ---------------------------------------------------------------- smoke test
 python3 src/tools/gen_circuits.py qft -n 10 --seed 1 -o "$CUDA_BUILD/smoke_qft10.txt"
@@ -40,6 +56,6 @@ python3 src/tools/gen_circuits.py qft -n 10 --seed 1 -o "$CUDA_BUILD/smoke_qft10
 
 # ---------------------------------------------------------------- validate
 echo "--- validating $QSIM_CUDA_BIN up to $MAX_QUBITS qubits"
-python3 src/tools/validate_qiskit.py --qsim "$QSIM_CUDA_BIN" --max-qubits "$MAX_QUBITS" \
-  --csv "$CUDA_BUILD/validation.csv"
-echo "done: validation passed, see $CUDA_BUILD/validation.csv"
+python3 src/tools/validate_qiskit.py --qsim "$QSIM_CUDA_BIN" --min-qubits "${MIN_QUBITS:-2}" \
+  --max-qubits "$MAX_QUBITS" --tol 1e-10 --csv "$OUT/validation.csv" | tee "$OUT/validation.txt"
+echo "done: validation passed, see $OUT/"
