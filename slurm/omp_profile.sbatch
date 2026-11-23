@@ -3,18 +3,19 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
-#SBATCH --exclusive
-#SBATCH --mem=0
+#SBATCH --mem=64G
 #SBATCH --time=00:45:00
 #SBATCH --output=slurm-%x-%j.out
 #
 # Set QSIM_MODULES_EXTRA to the site's LIKWID module if needed.
+# Course QOS "student": at most 64 CPUs per user (32 physical cores with 2 hardware
+# threads each) and no --exclusive, or the job waits forever (QOSMaxCpuPerUserLimit).
 # Submit from the repo root. See REPRODUCE.md for the outputs.
 set -euo pipefail
 
 N=${N:-28}
 ARRAY_MIB=${ARRAY_MIB:-2048}
-PROFILE_THREADS=${PROFILE_THREADS:-64}
+PROFILE_THREADS=${PROFILE_THREADS:-32}   # physical cores of a 64-CPU allocation
 PROFILE_PASSES=${PROFILE_PASSES:-20}
 PROFILE_REPEATS=${PROFILE_REPEATS:-3}
 export OMP_DYNAMIC=false OMP_PLACES=cores OMP_DISPLAY_AFFINITY=true

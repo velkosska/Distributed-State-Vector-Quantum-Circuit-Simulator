@@ -2,8 +2,7 @@
 #SBATCH --job-name=qsim-baseline
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --exclusive              # whole node: no neighbours competing for memory bandwidth
+#SBATCH --cpus-per-task=2        # one physical core (both hardware threads), 1 OpenMP thread
 #SBATCH --mem=16G                # 28 qubits = 4 GiB state
 #SBATCH --time=06:00:00
 #SBATCH --output=slurm-%x-%j.out
@@ -16,6 +15,10 @@
 #   sbatch slurm/baseline.sbatch                         # defaults below
 #   QUBITS="20 24" REPEATS=1 sbatch slurm/baseline.sbatch
 #   QUBITS="10 12" bash slurm/baseline.sbatch            # quick local test, no Slurm
+#
+# Course QOS "student": at most 64 CPUs per user (32 physical cores with 2 hardware
+# threads each) and no --exclusive, or the job waits forever (QOSMaxCpuPerUserLimit).
+# Other users' jobs can share the node's memory bandwidth: see methodology §7.
 #
 # Output: results/baseline/<jobid>/{meta.txt,runs.csv,raw/}  (see slurm/lib/run_harness.sh)
 set -euo pipefail

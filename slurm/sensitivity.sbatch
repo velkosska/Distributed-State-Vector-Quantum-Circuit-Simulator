@@ -2,9 +2,8 @@
 #SBATCH --job-name=qsim-sens
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=8      # P = nodes * ntasks-per-node ranks (power of two)
-#SBATCH --cpus-per-task=16
-#SBATCH --exclusive
-#SBATCH --mem=0
+#SBATCH --cpus-per-task=4        # 2 physical cores per rank; 2 x 8 x 4 = 64 CPUs (course QOS cap)
+#SBATCH --mem=100G               # per node
 #SBATCH --time=03:00:00
 #SBATCH --output=slurm-%x-%j.out
 ##SBATCH --partition=CHANGE_ME

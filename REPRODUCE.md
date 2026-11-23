@@ -89,15 +89,18 @@ are in `meta.txt`.
 | 4.1 | Memory bandwidth (roof) | `sbatch slurm/stream.sbatch` | roofline, bandwidth |
 | 4.2 | Serial baseline, 20–28 q | `sbatch slurm/baseline.sbatch` | time per gate vs qubits, bandwidth vs qubits |
 | 4.3 | OpenMP strong, 28 q | `sbatch slurm/omp_scaling.sbatch` | close/spread speedup and efficiency |
-| 4.4 | OpenMP weak, 24 q at 1 thread | `MODE=weak N=24 sbatch slurm/openmp_scaling.sbatch` | weak scaling |
-| 4.5 | MPI strong, 30 q | `MODE=strong N=30 sbatch --nodes=4 slurm/mpi_scaling.sbatch` | strong scaling, Amdahl |
-| 4.6 | MPI weak, 28 q at 1 rank | `MODE=weak N=28 sbatch --nodes=8 slurm/mpi_scaling.sbatch` | weak scaling, scale-up plan |
+| 4.4 | OpenMP weak, 24 q at 1 thread | `N=24 sbatch slurm/openmp_scaling.sbatch` | weak scaling |
+| 4.5 | MPI strong, 30 q | `MODE=strong N=30 sbatch slurm/mpi_scaling.sbatch` (2 nodes × 16 ranks) | strong scaling, Amdahl |
+| 4.6 | MPI weak, 28 q at 1 rank | `MODE=weak N=28 sbatch slurm/mpi_scaling.sbatch` (28 → 33 q) | weak scaling, scale-up plan |
 | 4.7 | Communication sensitivity | `sbatch slurm/sensitivity.sbatch` (N=30, P=16) | sensitivity |
 | 4.8 | CUDA, 20–30 q | `sbatch slurm/cuda.sbatch` | time per gate vs qubits |
 | 4.9 | CPU gate counters and matched STREAM triad | `sbatch slurm/omp_profile.sbatch` | measured DRAM bandwidth and CPU roofline |
+| 4.10 | Gate fusion before/after, 24–28 q, 1 thread and full node | `sbatch slurm/fusion.sbatch` | `results/fusion/<jobid>/fusion.csv`, `fusion.png` (`python3 analysis/fusion.py results/fusion/<jobid>`) |
 
-Set `--cpus-per-task` in `openmp_scaling.sbatch` and `stream.sbatch` to the
-core count of one node *(site)*. For the sensitivity job, turn the MPI qubit
+Every CPU script requests at most 64 CPUs and no `--exclusive`, because the
+course QOS caps a user at 64 CPUs (32 physical cores); a larger request waits
+forever with `QOSMaxCpuPerUserLimit`. Thread sweeps stop at the 32 physical
+cores. For the sensitivity job, turn the MPI qubit
 remapping off (pass its flag in `QSIM_ARGS`) so the static communication count
 matches what runs; see the header of `slurm/sensitivity.sbatch`.
 

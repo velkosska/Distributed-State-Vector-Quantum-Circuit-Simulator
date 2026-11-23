@@ -40,10 +40,19 @@ jobs:
           OMP_NUM_THREADS: 2
         run: python3 src/tools/validate_qiskit.py --qsim build/qsim --max-qubits 12 --csv validation.csv
 
+      - name: Validate with gate fusion (--fusion 1q)
+        env:
+          OMP_NUM_THREADS: 2
+        run: |
+          printf '#!/bin/sh\nexec "%s" "$@" --fusion 1q\n' "$PWD/build/qsim" > qsim_fused
+          chmod +x qsim_fused
+          python3 src/tools/validate_qiskit.py --qsim qsim_fused --max-qubits 12
+
       - name: Generator and analysis smoke test
         run: |
           python3 src/tools/gen_circuits.py random -n 10 --depth 4 --seed 1 --global-fraction 0.5 --global-qubits 2 -o rg.txt
           ./build/qsim rg.txt --quiet
+          ./build/qsim rg.txt --quiet --fusion 1q
           python3 src/tools/analyze_circuit.py rg.txt --ranks 1,2,4
 
       - name: Run harness smoke test (local mode, tiny sizes)
@@ -103,6 +112,15 @@ jobs:
           printf '#!/bin/sh\nexec "%s" "$@" --no-remap\n' "$PWD/build-mpi/qsim_mpi" > qsim_mpi_noremap
           chmod +x qsim_mpi_noremap
           python3 src/tools/validate_qiskit.py --qsim qsim_mpi_noremap --launcher "mpirun --oversubscribe -np 4" \
+            --min-qubits 3 --max-qubits 12
+
+      - name: Validate gate fusion on 4 ranks
+        env:
+          OMP_NUM_THREADS: 1
+        run: |
+          printf '#!/bin/sh\nexec "%s" "$@" --fusion 1q\n' "$PWD/build-mpi/qsim_mpi" > qsim_mpi_fused
+          chmod +x qsim_mpi_fused
+          python3 src/tools/validate_qiskit.py --qsim qsim_mpi_fused --launcher "mpirun --oversubscribe -np 4" \
             --min-qubits 3 --max-qubits 12
 
       - uses: actions/upload-artifact@v4

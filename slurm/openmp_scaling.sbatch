@@ -2,30 +2,39 @@
 #SBATCH --job-name=qsim-omp
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=128      # set to the core count of one node of your partition
-#SBATCH --exclusive
-#SBATCH --mem=0                  # all memory of the node
+#SBATCH --cpus-per-task=64       # course QOS cap; 32 physical cores
+#SBATCH --mem=64G
 #SBATCH --time=04:00:00
 #SBATCH --output=slurm-%x-%j.out
 ##SBATCH --partition=CHANGE_ME
 ##SBATCH --account=CHANGE_ME
 #
-# OpenMP strong and weak scaling on one node. Submit from the repo root.
+# OpenMP WEAK scaling on one node: N qubits at 1 thread, +1 qubit each time the
+# thread count doubles (constant amplitudes per thread). Submit from the repo root.
 #
-#   MODE=strong N=28 sbatch slurm/openmp_scaling.sbatch      # fixed 28 qubits, T = 1,2,4,..
-#   MODE=weak   N=24 sbatch slurm/openmp_scaling.sbatch      # 24q at T=1, +1 qubit per doubling
-#   THREADS="1 8 64" MODE=strong bash slurm/openmp_scaling.sbatch   # (only inside an allocation)
+#   N=24 sbatch slurm/openmp_scaling.sbatch                  # 24q at T=1 ... 30q at T=64
+#   THREADS="1 8 64" N=20 bash slurm/openmp_scaling.sbatch   # (only inside an allocation)
+#
+# Strong scaling (fixed 28 qubits, close vs spread, core pinning) is
+# slurm/omp_scaling.sbatch; this script refuses MODE=strong so the two scripts
+# never write the same experiment.
+# Course QOS "student": at most 64 CPUs per user (32 physical cores with 2 hardware
+# threads each) and no --exclusive, or the job waits forever (QOSMaxCpuPerUserLimit).
 #
 # Build: cmake -S . -B build-omp -DQSIM_OPENMP=ON && cmake --build build-omp -j
 set -euo pipefail
 
-MODE=${MODE:-strong}                 # strong | weak
-N=${N:-28}                           # strong: qubits; weak: qubits at T=1
+MODE=${MODE:-weak}                   # weak only (strong: slurm/omp_scaling.sbatch)
+N=${N:-24}                           # qubits at T=1
+if [ "$MODE" != weak ]; then
+  echo "openmp_scaling.sbatch runs weak scaling only; use slurm/omp_scaling.sbatch for strong scaling" >&2
+  exit 2
+fi
 KINDS=${KINDS:-"qft random"}
 REPEATS=${REPEATS:-3}
 SEED=${SEED:-1}
 RANDOM_DEPTH=${RANDOM_DEPTH:-10}
-MAX_T=${SLURM_CPUS_PER_TASK:-$(nproc)}
+MAX_T=$(python3 "${SLURM_SUBMIT_DIR:-.}/slurm/lib/physical_cores.py" | tr ',' '\n' | wc -l)   # physical cores
 THREADS=${THREADS:-}
 export QSIM_BIN=${QSIM_BIN:-build-omp/qsim}
 export BACKEND=openmp
