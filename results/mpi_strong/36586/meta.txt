@@ -1,0 +1,171 @@
+harness_version: 2
+experiment:      mpi_strong
+job_id:          36586
+job_name:        qsim-mpi
+job_script:      slurm/mpi_scaling.sbatch
+start:           2026-11-23T19:28:26+01:00
+submit_host:     rust
+batch_host:      haskell
+user:            hpcb37
+
+--- git
+git_commit:      fabbd993c8603246c77753f4f60ce073be0b7d74
+git_branch:      fusion-and-report
+git_describe:    fabbd99
+git_dirty:       no
+
+--- binary
+backend:         mpi
+qsim_bin:        build-mpi/qsim_mpi
+qsim_bin_sha256: 93bc2d0e8c900c49aee3a91185f47f200673d4130b4002f7c21568cd8960d260
+qsim_bin_mtime:  2026-11-23T14:51:38+01:00
+launcher:        none
+qsim_args:       none
+gate_timing:     1
+cmake_cache:     build-mpi/CMakeCache.txt
+  CMAKE_BUILD_TYPE:STRING=Release
+  CMAKE_CXX_COMPILER:FILEPATH=/cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen2/software/GCCcore/12.3.0/bin/c++
+  CMAKE_CXX_FLAGS:STRING=
+  CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+  MPI_CXX_COMPILER:FILEPATH=/cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/amd/zen2/software/OpenMPI/4.1.5-GCC-12.3.0/bin/mpicxx
+  QSIM_CUDA:BOOL=OFF
+  QSIM_LIKWID:BOOL=OFF
+  QSIM_MPI:BOOL=ON
+  QSIM_NATIVE:BOOL=ON
+  QSIM_OPENMP:BOOL=ON
+  QSIM_TESTS:BOOL=ON
+cxx:             c++ (GCC) 12.3.0
+mpi:             mpirun (Open MPI) 4.1.5
+python:          Python 3.11.3
+
+--- nodes
+nodelist:        haskell,julia
+nodes_expanded:  haskell julia
+num_nodes:       2
+partition:       cpu
+account:         hpcclass
+kernel:          6.17.2-1-pve
+
+--- cpu (batch host)
+  Architecture:                            x86_64
+  CPU(s):                                  512
+  Model name:                              AMD EPYC 9755 128-Core Processor
+  Thread(s) per core:                      2
+  Core(s) per socket:                      128
+  Socket(s):                               2
+  CPU(s) scaling MHz:                      53%
+  CPU max MHz:                             4122.7549
+  L1d cache:                               12 MiB (256 instances)
+  L2 cache:                                256 MiB (256 instances)
+  L3 cache:                                1 GiB (32 instances)
+  NUMA node(s):                            2
+  NUMA node0 CPU(s):                       0-127,256-383
+  NUMA node1 CPU(s):                       128-255,384-511
+  simd_flags: fma avx avx2 avx512f avx512dq
+  mem_total: 440.2 GiB
+  cpus_allowed: 8-23,264-279
+
+--- gpu
+  No devices were found
+
+--- module list
+  
+  Currently Loaded Modules:
+    1) GCCcore/12.3.0                   11) numactl/2.0.16-GCCcore-12.3.0
+    2) GCC/12.3.0                       12) libxml2/2.11.4-GCCcore-12.3.0
+    3) OpenSSL/1.1                      13) libpciaccess/0.17-GCCcore-12.3.0
+    4) cURL/8.0.1-GCCcore-12.3.0        14) hwloc/2.9.1-GCCcore-12.3.0
+    5) libarchive/3.6.2-GCCcore-12.3.0  15) libevent/2.1.12-GCCcore-12.3.0
+    6) CMake/3.26.3-GCCcore-12.3.0      16) UCX/1.14.1-GCCcore-12.3.0
+    7) Tcl/8.6.13-GCCcore-12.3.0        17) libfabric/1.18.0-GCCcore-12.3.0
+    8) SQLite/3.42.0-GCCcore-12.3.0     18) PMIx/4.2.4-GCCcore-12.3.0
+    9) libffi/3.4.4-GCCcore-12.3.0      19) UCC/1.2.0-GCCcore-12.3.0
+   10) Python/3.11.3-GCCcore-12.3.0     20) OpenMPI/4.1.5-GCC-12.3.0
+  
+   
+  
+
+--- environment (OMP_*, KMP_*, GOMP_*, SLURM_*, MPI, UCX, CUDA, QSIM_*)
+  BACKEND=mpi
+  FI_PROVIDER=tcp
+  I_MPI_HYDRA_BOOTSTRAP=slurm
+  I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS=--external-launcher
+  KINDS=random
+  OMPI_MCA_hwloc_base_use_hwthreads_as_cpus=1
+  OMPI_MCA_plm_slurm_args=--external-launcher
+  OMP_NUM_THREADS=2
+  OMP_PLACES=cores
+  OMP_PROC_BIND=close
+  PMIX_MCA_psec=native
+  QSIM_BIN=build-mpi/qsim_mpi
+  QSIM_MODULES_EXTRA=mpi
+  QSIM_ROOT=/home/hpcb37/qsim
+  SLURM_CLUSTER_NAME=scitech
+  SLURM_CONF=/etc/slurm/slurm.conf
+  SLURM_CPUS_ON_NODE=32
+  SLURM_CPUS_PER_TASK=2
+  SLURM_GTIDS=0
+  SLURM_JOBID=36586
+  SLURM_JOB_ACCOUNT=hpcclass
+  SLURM_JOB_CPUS_PER_NODE=32(x2)
+  SLURM_JOB_END_TIME=1795469306
+  SLURM_JOB_GID=1000000
+  SLURM_JOB_ID=36586
+  SLURM_JOB_NAME=qsim-mpi
+  SLURM_JOB_NODELIST=haskell,julia
+  SLURM_JOB_NUM_NODES=2
+  SLURM_JOB_PARTITION=cpu
+  SLURM_JOB_QOS=student
+  SLURM_JOB_START_TIME=1795458506
+  SLURM_JOB_UID=1000224
+  SLURM_LOCALID=0
+  SLURM_MEM_PER_NODE=102400
+  SLURM_NNODES=2
+  SLURM_NODEID=0
+  SLURM_NODELIST=haskell,julia
+  SLURM_NPROCS=32
+  SLURM_NTASKS=32
+  SLURM_NTASKS_PER_NODE=16
+  SLURM_OOM_KILL_STEP=0
+  SLURM_PRIO_PROCESS=0
+  SLURM_PROCID=0
+  SLURM_SUBMIT_DIR=/home/hpcb37/qsim
+  SLURM_SUBMIT_HOST=rust
+  SLURM_TASKS_PER_NODE=16(x2)
+  SLURM_TASK_PID=914911
+  SLURM_TOPOLOGY_ADDR=haskell
+  SLURM_TOPOLOGY_ADDR_PATTERN=node
+  SLURM_TRES_PER_TASK=cpu=2
+  UCX_TLS=tcp,sm,self
+
+--- circuits (generator command, sha256)
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0001  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=1 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0001_random_30q_p1_t2_rep1.gates.csv 
+r0002  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=1 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0002_random_30q_p1_t2_rep2.gates.csv 
+r0003  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=1 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0003_random_30q_p1_t2_rep3.gates.csv 
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0004  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=2 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0004_random_30q_p2_t2_rep1.gates.csv 
+r0005  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=2 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0005_random_30q_p2_t2_rep2.gates.csv 
+r0006  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=2 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0006_random_30q_p2_t2_rep3.gates.csv 
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0007  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=4 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0007_random_30q_p4_t2_rep1.gates.csv 
+r0008  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=4 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0008_random_30q_p4_t2_rep2.gates.csv 
+r0009  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=4 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0009_random_30q_p4_t2_rep3.gates.csv 
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0010  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=8 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0010_random_30q_p8_t2_rep1.gates.csv 
+r0011  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=8 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0011_random_30q_p8_t2_rep2.gates.csv 
+r0012  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=8 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0012_random_30q_p8_t2_rep3.gates.csv 
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0013  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=16 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0013_random_30q_p16_t2_rep1.gates.csv 
+r0014  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=16 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0014_random_30q_p16_t2_rep2.gates.csv 
+r0015  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=1 --ntasks=16 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0015_random_30q_p16_t2_rep3.gates.csv 
+0356a5aaff00b902  python3 src/tools/gen_circuits.py random -n 30 --seed 1 --depth 10 -o data/mpi_strong/random_30_seed_1_depth_10.txt
+r0016  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=2 --ntasks=32 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0016_random_30q_p32_t2_rep1.gates.csv 
+r0017  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=2 --ntasks=32 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0017_random_30q_p32_t2_rep2.gates.csv 
+r0018  OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores srun --nodes=2 --ntasks=32 --cpus-per-task=2 --exact --cpu-bind=cores build-mpi/qsim_mpi data/mpi_strong/random_30_seed_1_depth_10.txt --timing results/mpi_strong/36586/raw/r0018_random_30q_p32_t2_rep3.gates.csv 
+
+--- end
+end:             2026-11-23T21:46:15+01:00
+elapsed_s:       8269
+runs:            18
+failed_runs:     0

@@ -1,0 +1,16 @@
+run_id,experiment,job_id,backend,kind,qubits,nodes,ranks,threads,gpus,repeat,seed,depth,iterations,global_fraction,global_qubits,gates_in,gates_run,fusion,total_s,mean_gate_s,norm_err,status,tag,circuit,timing_csv
+r0001,mpi_strong,36515,mpi,qft,30,1,1,2,0,1,1,,,,,510,510,none,301.857037,0.591876544,8.98519037e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0001_qft_30q_p1_t2_rep1.gates.csv
+r0002,mpi_strong,36515,mpi,qft,30,1,1,2,0,2,1,,,,,510,510,none,463.998474,0.909800929,8.98519037e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0002_qft_30q_p1_t2_rep2.gates.csv
+r0003,mpi_strong,36515,mpi,qft,30,1,1,2,0,3,1,,,,,510,510,none,275.319502,0.539842161,8.98519037e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0003_qft_30q_p1_t2_rep3.gates.csv
+r0004,mpi_strong,36515,mpi,qft,30,1,2,2,0,1,1,,,,,510,510,none,259.161288,0.508159389,2.731948e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0004_qft_30q_p2_t2_rep1.gates.csv
+r0005,mpi_strong,36515,mpi,qft,30,1,2,2,0,2,1,,,,,510,510,none,154.478194,0.30289842,2.731948e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0005_qft_30q_p2_t2_rep2.gates.csv
+r0006,mpi_strong,36515,mpi,qft,30,1,2,2,0,3,1,,,,,510,510,none,258.849744,0.507548518,2.731948e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0006_qft_30q_p2_t2_rep3.gates.csv
+r0007,mpi_strong,36515,mpi,qft,30,1,4,2,0,1,1,,,,,510,510,none,112.440289,0.220471155,1.36710643e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0007_qft_30q_p4_t2_rep1.gates.csv
+r0008,mpi_strong,36515,mpi,qft,30,1,4,2,0,2,1,,,,,510,510,none,290.772568,0.570142291,1.36710643e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0008_qft_30q_p4_t2_rep2.gates.csv
+r0009,mpi_strong,36515,mpi,qft,30,1,4,2,0,3,1,,,,,510,510,none,111.667158,0.218955211,1.36710643e-11,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0009_qft_30q_p4_t2_rep3.gates.csv
+r0010,mpi_strong,36515,mpi,qft,30,1,8,2,0,1,1,,,,,510,510,none,331.747567,0.650485425,3.89466237e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0010_qft_30q_p8_t2_rep1.gates.csv
+r0011,mpi_strong,36515,mpi,qft,30,1,8,2,0,2,1,,,,,510,510,none,66.7503596,0.130883058,3.89466237e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0011_qft_30q_p8_t2_rep2.gates.csv
+r0012,mpi_strong,36515,mpi,qft,30,1,8,2,0,3,1,,,,,510,510,none,310.858161,0.609525805,3.89466237e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0012_qft_30q_p8_t2_rep3.gates.csv
+r0013,mpi_strong,36515,mpi,qft,30,1,16,2,0,1,1,,,,,510,510,none,57.15535,0.112069314,1.34126044e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0013_qft_30q_p16_t2_rep1.gates.csv
+r0014,mpi_strong,36515,mpi,qft,30,1,16,2,0,2,1,,,,,510,510,none,157.401156,0.308629718,1.34126044e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0014_qft_30q_p16_t2_rep2.gates.csv
+r0015,mpi_strong,36515,mpi,qft,30,1,16,2,0,3,1,,,,,510,510,none,57.1948691,0.112146802,1.34126044e-12,ok,strong,data/mpi_strong/qft_30_seed_1.txt,raw/r0015_qft_30q_p16_t2_rep3.gates.csv

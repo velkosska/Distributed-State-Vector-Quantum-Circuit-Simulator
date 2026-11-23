@@ -61,7 +61,7 @@ jobs:
         run: |
           QUBITS="8 10" REPEATS=2 bash slurm/baseline.sbatch
           ./build/stream_triad 16 2
-          test "$(tail -n +2 results/baseline/*/runs.csv | grep -c ',ok,')" -eq 12
+          test "$(tail -n +2 results/baseline/local-*/runs.csv | grep -c ',ok,')" -eq 12
 
       - name: Analysis tests
         run: python3 -m pytest analysis -q
